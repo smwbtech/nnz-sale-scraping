@@ -3,7 +3,8 @@ include includes/head.pug
 body
     main
         form
-            input(type="file" name="tablefile")
+            label(for="tablefile") Загрузить файл
+            input(type="file" name="tablefile" id="tablefile")
             input(type="submit")
-    p#flashMessage
-    p#status.inactive Загрузка...
+            p#flashMessage
+            p#status.inactive Загрузка...

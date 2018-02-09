@@ -27,11 +27,18 @@ app.post('/sendfile', upload.single('tablefile'), (req, res, err) => {
     src.on('end', () => {
         res.send('ok');
         parcer.parseFile(target_path)
-        .then( (res) => parcer.getLinks(res))
         .then( (res) => {
-            console.log('thans all');
+            let date = new Date();
+            console.log('Время начала:' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds());
+            return parcer.getLinks(res)
+        })
+        .then( (res) => {
+            let date = new Date();
             let data = res;
-            xlsx.write('links.xlsx', data, (err) => console.log(err));
+            console.log('Время окончания:' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds());
+            xlsx.write('links.xlsx', data, (err) => {
+                if(err) console.log(err);
+            });
         });
     });
 
