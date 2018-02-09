@@ -1,0 +1,28 @@
+{
+  "name": "nnz-scrapping",
+  "version": "0.1.0",
+  "description": "Scrapping products from new nnz site via id",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smwbtech/nnz-scraping.git"
+  },
+  "author": "Roman Privalov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/smwbtech/nnz-scraping/issues"
+  },
+  "homepage": "https://github.com/smwbtech/nnz-scraping#readme",
+  "devDependencies": {},
+  "dependencies": {
+    "express": "^4.16.2",
+    "multer": "^1.3.0",
+    "pug": "^2.0.0-rc.4",
+    "puppeteer": "^1.0.0",
+    "xlsx-writestream": "^0.5.1",
+    "xlsx2json": "^1.0.0"
+  }
+}
