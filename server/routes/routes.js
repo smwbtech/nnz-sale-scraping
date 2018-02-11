@@ -1,28 +1,22 @@
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const multer = require('multer');
-const parcer = require('./lib/parcer');
+const parcer = require('./../lib/parcer');
+const db = require('./../lib/db');
 const xlsx = require('xlsx-writestream');
 
-let app = express();
+let router = express.Router();
 let upload = multer({ dest: './public/upload/' });
 
-app.set('port', process.env.PORT || 3000);
-app.set('view engine', 'pug');
-
-app.get('/', (req, res, err) => {
-    if(err) console.error(err);
-    res.render('index');
-    parcer.getFeatures('6108627');
-});
-
-app.get('/test', (req, res, err) => {
+//Главная страница
+router.get('/', (req, res, err) => {
     if(err) console.log(err);
-    res.sendFile(path.resolve(__dirname) + '/public/index.html');
+    res.sendFile(path.resolve('../public/index.html'));
 });
 
-app.post('/sendfile', upload.single('tablefile'), (req, res, err) => {
+//Генериуем файл распродажи
+router.post('/getsales', upload.single('tablefile'), (req, res, err) => {
     if(err) console.error(err);
     console.log(req.file);
     let tmp_path = req.file.path;
@@ -51,22 +45,4 @@ app.post('/sendfile', upload.single('tablefile'), (req, res, err) => {
 
 });
 
-app.use(express.static(`${__dirname}/public`));
-
-// 404
-app.use( (req, res) => {
-    res.status(404);
-    console.log(404);
-    res.status(404);
-});
-
-// 500
-app.use( (err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500);
-    res.send('500 - server error');
-});
-
-app.listen(app.get('port'), () => {
-    console.log('Server is running on 3000 port');
-})
+module.exports = router;

@@ -5,7 +5,7 @@ import Router from './../node_modules/vue-router/dist/vue-router.js';
 
 //компоненты
 
-import menu from './vue-comp/menu.vue';
+import sideMenu from './vue-comp/side-menu.vue';
 import sales from './vue-comp/sales.vue';
 
 Vue.use(Router);
@@ -29,6 +29,7 @@ let app = new Vue({
     router,
 
     components: {
+        'side-menu': sideMenu,
         'sales': sales
     },
 
