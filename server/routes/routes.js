@@ -74,4 +74,7 @@ router.post('/getsales', upload.single('tablefile'), (req, res, err) => {
 
 });
 
+//Показываем прогресс
+
+
 module.exports = router;

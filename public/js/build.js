@@ -328,10 +328,10 @@ if(false) {
 
 exports = module.exports = __webpack_require__(2)(false);
 // imports
-
+exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "*,:after,:before{box-sizing:border-box}input{outline:none}#app{min-width:100vw;min-height:100vh}", ""]);
+exports.push([module.i, ":root{font-family:Open Sans,sans-serif}*,:after,:before{box-sizing:border-box}input{outline:none}ul{margin:0;padding:0}#app{min-width:100vw;min-height:100vh}.main{display:flex;min-width:100%;min-height:100%}", ""]);
 
 // exports
 
@@ -15141,10 +15141,10 @@ if(false) {
 
 exports = module.exports = __webpack_require__(2)(false);
 // imports
-
+exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "", ""]);
+exports.push([module.i, ":root{font-family:Open Sans,sans-serif}", ""]);
 
 // exports
 
@@ -15160,13 +15160,64 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _axios = _interopRequireDefault(__webpack_require__(38));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 //
 //
 //
 //
 //
 //
-var _default = {};
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+var _default = {
+  data: function data() {
+    return {
+      stage: 1,
+      link: ''
+    };
+  },
+  methods: {
+    //Загрузка файла
+    loadFileHandler: function loadFileHandler(e) {
+      // TODO: валидация на верный формат
+      console.log(e.target.files[0]);
+      var file = e.target.files[0];
+
+      if (file) {
+        var config = {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        };
+        var formData = new FormData();
+        formData.append('tablefile', file, file.name);
+        this.stage = 2;
+
+        _axios.default.post('/getsales', formData, config).then(function (res) {
+          return console.log(res);
+        }).catch(function (err) {
+          return console.log(err);
+        });
+      }
+    }
+  }
+};
 exports.default = _default;
 
 /***/ }),
@@ -15262,10 +15313,10 @@ if(false) {
 
 exports = module.exports = __webpack_require__(2)(true);
 // imports
-
+exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"sales.vue","sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.sale{padding-left:4.16667vw;display:flex;flex-flow:column;width:100%;min-height:100%\n}\n.sale-controls{position:relative;width:100%\n}\n.sale-controls__load-btn{position:absolute;left:35%;top:0;width:30%;height:8.33333vh;padding:10px;border-radius:15px;text-align:center;background-color:#008f9f;color:#fff\n}\n.sale-controls__file{display:none\n}\n.sale-progressbar{position:absolute;left:0;top:0;width:100%;border-radius:15px;background-color:#fff;height:8.33333vh;overflow:hidden\n}\n.sale-progressbar__progress{width:0;height:100%;background-color:#00a287\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/sales.vue"],"names":[],"mappings":";AAEA,MAOI,gCAAqC;CACxC;ACgDD,MACA,uBAAA,aACA,iBACA,WACA,eACA;CACA;AAEA,eACA,kBAAA,UACA;CACA;AAEA,yBACA,kBAAA,SACA,MACA,UACA,iBACA,aACA,mBACA,kBACA,yBACA,UACA;CACA;AAEA,qBACA,YAAA;CACA;AAEA,kBACA,kBAAA,OACA,MACA,WACA,mBACA,sBACA,iBACA,eACA;CACA;AAEA,4BACA,QAAA,YACA,wBACA;CACA","file":"sales.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <div class=\"sale\">\n        <p class=\"sale-info\"></p>\n\n        <div class=\"sale-controls\">\n            <label v-show=\"stage === 1\" class=\"sale-controls__load-btn\" for=\"tablefile\">Загрузить файл</label>\n            <input class=\"sale-controls__file\" type=\"file\" name=\"tablefile\" id=\"tablefile\" @change=\"loadFileHandler\">\n            <div v-show=\"stage === 2\" class=\"sale-progressbar\">\n                <div class=\"sale-progressbar__progress\"></div>\n                <div class=\"sale-progressbar__bg\"></div>\n            </div>\n            <div v-show=\"stage === 3\" class=\"sale-controls-link\">\n                <a :href=\"link\">{{link}}</a>\n            </div>\n        </div>\n    </div>\n\n</template>\n\n<script>\n\nimport axios from './../../node_modules/axios/dist/axios.js';\n\nexport default {\n\n    data() {\n        return {\n            stage: 1,\n            link: ''\n        }\n    },\n\n    methods: {\n        //Загрузка файла\n        loadFileHandler(e) {\n            // TODO: валидация на верный формат\n            console.log(e.target.files[0]);\n            let file = e.target.files[0];\n            if(file) {\n                const config = { headers: { 'Content-Type': 'multipart/form-data' } };\n                let formData = new FormData();\n                formData.append('tablefile', file, file.name);\n                this.stage = 2;\n                axios.post('/getsales', formData, config)\n                .then( (res) => console.log(res))\n                .catch( (err) => console.log(err));\n            }\n        }\n    }\n\n}\n</script>\n\n<style lang=\"css\">\n\n@import './../css/variables.css';\n\n.sale {\n    padding-left: var(--column);\n    display: flex;\n    flex-flow: column;\n    width: 100%;\n    min-height: 100%;\n}\n\n.sale-controls {\n    position: relative;\n    width: 100%;\n}\n\n.sale-controls__load-btn {\n    position: absolute;\n    left: 35%;\n    top: 0%;\n    width: 30%;\n    height: var(--row);\n    padding: 10px;\n    border-radius: 15px;\n    text-align: center;\n    background-color: var(--marine);\n    color: #fff;\n}\n\n.sale-controls__file {\n    display: none;\n}\n\n.sale-progressbar {\n    position: absolute;\n    left: 0;\n    top: 0;\n    width: 100%;\n    border-radius: 15px;\n    background-color: #fff;\n    height: var(--row);\n    overflow: hidden;\n}\n\n.sale-progressbar__progress {\n    width: 0;\n    height: 100%;\n    background-color: var(--green);\n}\n\n\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -15281,7 +15332,70 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("p", [_vm._v("content")])
+  return _c("div", { staticClass: "sale" }, [
+    _c("p", { staticClass: "sale-info" }),
+    _vm._v(" "),
+    _c("div", { staticClass: "sale-controls" }, [
+      _c(
+        "label",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: _vm.stage === 1,
+              expression: "stage === 1"
+            }
+          ],
+          staticClass: "sale-controls__load-btn",
+          attrs: { for: "tablefile" }
+        },
+        [_vm._v("Загрузить файл")]
+      ),
+      _vm._v(" "),
+      _c("input", {
+        staticClass: "sale-controls__file",
+        attrs: { type: "file", name: "tablefile", id: "tablefile" },
+        on: { change: _vm.loadFileHandler }
+      }),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: _vm.stage === 2,
+              expression: "stage === 2"
+            }
+          ],
+          staticClass: "sale-progressbar"
+        },
+        [
+          _c("div", { staticClass: "sale-progressbar__progress" }),
+          _vm._v(" "),
+          _c("div", { staticClass: "sale-progressbar__bg" })
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: _vm.stage === 3,
+              expression: "stage === 3"
+            }
+          ],
+          staticClass: "sale-controls-link"
+        },
+        [_c("a", { attrs: { href: _vm.link } }, [_vm._v(_vm._s(_vm.link))])]
+      )
+    ])
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -15309,6 +15423,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+//
+//
 //
 //
 //
@@ -15417,10 +15533,10 @@ if(false) {
 
 exports = module.exports = __webpack_require__(2)(true);
 // imports
-
+exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"side-menu.vue","sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.menu{height:100%;position:relative\n}\n.menu{width:calc(4.16667vw * 5)\n}\n.menu-nav{width:calc(4.16667vw * 5)\n}\n.menu-nav{position:fixed;top:0;left:0;height:100vh;height:100%;padding-top:calc(8.33333vh * 4);background-image:linear-gradient(180deg,#203756,#465e7e)\n}\n.menu-nav ul{list-style:none\n}\n.menu-nav a,.menu-nav li{display:block\n}\n.menu-nav a{padding:20px 10px 20px 40px;text-decoration:none;color:#fff;background-color:rgba(0,143,159,0);transition:background-color .2s ease-in-out\n}\n.menu-nav a:hover{background-color:#008f9f\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/side-menu.vue"],"names":[],"mappings":";AAEA,MAOI,gCAAqC;CACxC;ACaD,MAEA,YAAA,iBACA;CACA;AAEA,MALA,yBAAA;CAcA;AATA,UALA,yBAAA;CAcA;AATA,UACA,eAAA,MACA,OACA,aACA,YAEA,gCACA,wDACA;CACA;AAEA,aACA,eAAA;CACA;AAMA,yBAHA,aAAA;CAYA;AATA,YAEA,4BAAA,qBACA,WACA,mCACA,2CAGA;CACA;AAEA,kBACA,wBAAA;CACA","file":"side-menu.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <aside class=\"menu\">\n        <nav class=\"menu-nav\">\n            <ul>\n                <li><router-link to=\"/\">РАСПРОДАЖА</router-link></li>\n                <li><router-link to=\"/schema\">ШАБЛОНЫ</router-link></li>\n                <li><router-link to=\"/schema\">ХАРАКТЕРИСТИКИ</router-link></li>\n            </ul>\n        </nav>\n    </aside>\n\n</template>\n\n<script>\nexport default {\n}\n</script>\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .menu {\n        width: calc(var(--column) * 5);\n        height: 100%;\n        position: relative;\n    }\n\n    .menu-nav {\n        position: fixed;\n        top: 0;\n        left: 0;\n        height: 100vh;\n        width: calc(var(--column) * 5);\n        height: 100%;\n        padding-top: calc(var(--row) * 4);\n        background-image: linear-gradient(to bottom, #203756, #465E7E);\n    }\n\n    .menu-nav ul {\n        list-style: none;\n    }\n\n    .menu-nav li {\n        display: block;\n    }\n\n    .menu-nav a {\n        display: block;\n        padding: 20px 10px 20px 40px;\n        text-decoration: none;\n        color: #fff;\n        background-color: rgba(0,143,159,0);\n        -webkit-transition: background-color .2s ease-in-out;\n        -o-transition: background-color .2s ease-in-out;\n        transition: background-color .2s ease-in-out;\n    }\n\n    .menu-nav a:hover {\n        background-color: rgba(0,143,159,1);\n    }\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -15436,12 +15552,30 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("aside", [
-    _c("nav", [
+  return _c("aside", { staticClass: "menu" }, [
+    _c("nav", { staticClass: "menu-nav" }, [
       _c("ul", [
         _c(
           "li",
-          [_c("router-link", { attrs: { to: "/" } }, [_vm._v("Главная")])],
+          [_c("router-link", { attrs: { to: "/" } }, [_vm._v("РАСПРОДАЖА")])],
+          1
+        ),
+        _vm._v(" "),
+        _c(
+          "li",
+          [
+            _c("router-link", { attrs: { to: "/schema" } }, [_vm._v("ШАБЛОНЫ")])
+          ],
+          1
+        ),
+        _vm._v(" "),
+        _c(
+          "li",
+          [
+            _c("router-link", { attrs: { to: "/schema" } }, [
+              _vm._v("ХАРАКТЕРИСТИКИ")
+            ])
+          ],
           1
         )
       ])
@@ -17265,10 +17399,10 @@ if(false) {
 var escape = __webpack_require__(46);
 exports = module.exports = __webpack_require__(2)(true);
 // imports
-
+exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n.login{width:100%;min-height:100vh;background-image:url(" + escape(__webpack_require__(47)) + ");background-size:cover;display:flex;justify-content:center;align-items:center\n}\n.login-form{width:calc(4.16667vw * 12);padding:20px;border-radius:15px;background-color:hsla(0,0%,100%,.65);box-shadow:5px 5px 10px rgba(0,0,0,.1)\n}\n.login-form__input,.login-form__submit{display:block;margin:40px auto;width:60%;text-align:center;border:none;background-color:transparent\n}\n.login-form__input{border-bottom:2px solid #008f9f\n}\n.login-form__submit{width:40%;border-radius:15px;padding:10px 0;background-color:#008f9f;color:#fff\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/login.vue"],"names":[],"mappings":";AAgEA,OACA,WAAA,iBACA,+CACA,sBACA,aACA,uBACA,kBACA;CACA;AAEA,YACA,2BAAA,aACA,mBACA,qCACA,sCAEA;CACA;AAEA,uCAEA,cAAA,iBACA,UACA,kBACA,YACA,4BACA;CACA;AAEA,mBACA,+BAAA;CACA;AAEA,oBACA,UAAA,mBACA,eACA,yBACA,UACA;CACA","file":"login.vue","sourcesContent":["<template lang=\"html\">\n\n  <section class=\"login\">\n\n      <form action=\"\" class=\"login-form\" @submit.prevent=\"loginHandler\">\n          <input class=\"login-form__input\"type=\"text\" name=\"login\" id=\"\" placeholder=\"Логин\" v-model=\"login\" required>\n          <input class=\"login-form__input\"type=\"password\" name=\"password\" id=\"\" placeholder=\"Пароль\" v-model=\"password\" required>\n          <input class=\"login-form__submit\"type=\"submit\" value=\"Войти\">\n          <p v-show=\"flashMessage.length > 0\">{{flashMessage}}</p>\n\n      </form>\n\n  </section>\n\n</template>\n\n<script>\nimport axios from './../../node_modules/axios/dist/axios.js';\n\nexport default {\n\n    data() {\n        return {\n            login: '',\n            password: '',\n            flashMessage: ''\n        }\n    },\n\n    methods: {\n\n        //Логин\n        loginHandler() {\n\n            let userData = {\n                login: this.login,\n                password: this.password\n            };\n\n            axios.post('/login', userData)\n            .then( (res) => {\n                if(res.data.status) {\n                    localStorage.setItem('_token', res.data.message);\n                    this.$router.replace('/');\n                }\n                else {\n                    this.flashMessage = res.data.message;\n                }\n            })\n            .catch( (err) => console.log(err));\n        }\n\n    }\n\n\n}\n</script>\n\n\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .login {\n        width: 100%;\n        min-height: 100vh;\n        background-image: url('./../img/background.jpg');\n        background-size: cover;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .login-form {\n        width: calc(var(--column) * 12);\n        padding: 20px;\n        border-radius: 15px;\n        background-color: rgba(255,255,255, .65);\n        -webkit-box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n        box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n    }\n\n    .login-form__input,\n    .login-form__submit {\n        display: block;\n        margin: 40px auto;\n        width: 60%;\n        text-align: center;\n        border: none;\n        background-color: rgba(0,0,0,0);\n    }\n\n    .login-form__input {\n        border-bottom: 2px solid var(--marine);\n    }\n\n    .login-form__submit {\n        width: 40%;\n        border-radius: 15px;\n        padding: 10px 0px;\n        background-color: var(--marine);\n        color: #fff;\n    }\n\n</style>\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.login{width:100%;min-height:100vh;background-image:url(" + escape(__webpack_require__(47)) + ");background-size:cover;display:flex;justify-content:center;align-items:center\n}\n.login-form{width:calc(4.16667vw * 12);padding:20px;border-radius:15px;background-color:hsla(0,0%,100%,.65);box-shadow:5px 5px 10px rgba(0,0,0,.1)\n}\n.login-form__input,.login-form__submit{display:block;margin:40px auto;width:60%;text-align:center;border:none;background-color:transparent\n}\n.login-form__input{border-bottom:2px solid #008f9f\n}\n.login-form__submit{width:40%;border-radius:15px;padding:10px 0;background-color:#008f9f;color:#fff\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/login.vue"],"names":[],"mappings":";AAEA,MAOI,gCAAqC;CACxC;ACsDD,OACA,WAAA,iBACA,+CACA,sBACA,aACA,uBACA,kBACA;CACA;AAEA,YACA,2BAAA,aACA,mBACA,qCACA,sCAEA;CACA;AAEA,uCAEA,cAAA,iBACA,UACA,kBACA,YACA,4BACA;CACA;AAEA,mBACA,+BAAA;CACA;AAEA,oBACA,UAAA,mBACA,eACA,yBACA,UACA;CACA","file":"login.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n  <section class=\"login\">\n\n      <form action=\"\" class=\"login-form\" @submit.prevent=\"loginHandler\">\n          <input class=\"login-form__input\"type=\"text\" name=\"login\" id=\"\" placeholder=\"Логин\" v-model=\"login\" required>\n          <input class=\"login-form__input\"type=\"password\" name=\"password\" id=\"\" placeholder=\"Пароль\" v-model=\"password\" required>\n          <input class=\"login-form__submit\"type=\"submit\" value=\"Войти\">\n          <p v-show=\"flashMessage.length > 0\">{{flashMessage}}</p>\n\n      </form>\n\n  </section>\n\n</template>\n\n<script>\nimport axios from './../../node_modules/axios/dist/axios.js';\n\nexport default {\n\n    data() {\n        return {\n            login: '',\n            password: '',\n            flashMessage: ''\n        }\n    },\n\n    methods: {\n\n        //Логин\n        loginHandler() {\n\n            let userData = {\n                login: this.login,\n                password: this.password\n            };\n\n            axios.post('/login', userData)\n            .then( (res) => {\n                if(res.data.status) {\n                    localStorage.setItem('_token', res.data.message);\n                    this.$router.replace('/');\n                }\n                else {\n                    this.flashMessage = res.data.message;\n                }\n            })\n            .catch( (err) => console.log(err));\n        }\n\n    }\n\n\n}\n</script>\n\n\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .login {\n        width: 100%;\n        min-height: 100vh;\n        background-image: url('./../img/background.jpg');\n        background-size: cover;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .login-form {\n        width: calc(var(--column) * 12);\n        padding: 20px;\n        border-radius: 15px;\n        background-color: rgba(255,255,255, .65);\n        -webkit-box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n        box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n    }\n\n    .login-form__input,\n    .login-form__submit {\n        display: block;\n        margin: 40px auto;\n        width: 60%;\n        text-align: center;\n        border: none;\n        background-color: rgba(0,0,0,0);\n    }\n\n    .login-form__input {\n        border-bottom: 2px solid var(--marine);\n    }\n\n    .login-form__submit {\n        width: 40%;\n        border-radius: 15px;\n        padding: 10px 0px;\n        background-color: var(--marine);\n        color: #fff;\n    }\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 

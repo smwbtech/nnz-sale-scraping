@@ -1,7 +1,11 @@
+@import "http://fonts.fontstorage.com/import/opensans.css";
+
 :root {
     --marine: #008F9F;
+    --green: #00A287;
     --column: calc(100vw / 24);
     --row: calc(100vh / 12);
     --column-mobile: calc(100vw / 12);
     --row-mobile: calc(100vh / 24);
+    font-family: 'Open Sans', sans-serif;
 }

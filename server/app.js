@@ -8,6 +8,8 @@ let app = express();
 
 app.set('port', process.env.PORT || 3000);
 
+global.progressBars = [];
+
 //Отработка роутов
 app.use('/', router);
 app.use('/login', router);

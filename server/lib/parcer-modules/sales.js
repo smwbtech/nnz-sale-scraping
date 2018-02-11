@@ -17,7 +17,7 @@ function getLinks(jsonList) {
             width: 20,
             total: res.length
         });
-        let linkArr = [];
+        global.bar = bar;
 
         for(let i = 0; i < res.length; i++) {
             try {
@@ -36,6 +36,8 @@ function getLinks(jsonList) {
                 }, linkSelector);
 
                 res[i].link = link;
+                console.log(bar.curr);
+                console.log(bar.total);
                 bar.tick();
 
                 // console.log(link);
@@ -50,7 +52,7 @@ function getLinks(jsonList) {
         }
 
         await browser.close();
-
+        delete global.bar;
         return res;
 
     })()
