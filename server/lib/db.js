@@ -1,7 +1,9 @@
 const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectId
 const assert = require('assert');
 const config = require('./config');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const url = `mongodb://${config.dbUser}:${config.dbPassword}@cluster0-shard-00-00-s7ik5.mongodb.net:27017,cluster0-shard-00-01-s7ik5.mongodb.net:27017,cluster0-shard-00-02-s7ik5.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin`;
 const dbName = config.dbName;
@@ -37,15 +39,69 @@ let db = {
                       .insertOne(userObj, (err, res) => {
                           assert.equal(null, err);
                           assert.equal(1, res.insertedCount);
-                          console.log(res);
+                          return true;
 
                       });
-                      console.log("Connected successfully to server");
                       client.close();
                     });
                 }
             });
         });
+    },
+
+    //Авторизация пользователя пользователя
+    login(login, password) {
+        let result = {
+            status: true,
+            message: ''
+        };
+        return MongoClient.connect(url)
+
+            .then( (client) => {
+                const db = client.db(dbName);
+                return db.collection('users').find({login: login}).toArray();
+            })
+
+            .then( (user) => {
+                if(user.length === 0) {
+                    result.status = false;
+                    result.message = 'Неверное сочетание логина и пароля';
+                    return result;
+                }
+
+                return bcrypt.compare(password, user[0].password)
+                .then( (res) => {
+                    if(!res) {
+                        result.status = false;
+                        result.message = 'Неверное сочетание логина и пароля';
+                        return result;
+                    }
+                    else {
+                        result.message = jwt.sign({
+                          exp: Math.floor(Date.now() / 1000) + (60 * 60),
+                          data: user[0]._id
+                        }, config.secret);
+                        return result;
+                    }
+                });
+            })
+            .catch( (err) => console.error(err));
+    },
+
+    //Аутентификация пользователя
+    checkUser(token) {
+        let id = new ObjectId(jwt.verify(token, config.secret).data);
+        return MongoClient.connect(url)
+        .then( (client) => {
+            const db = client.db(dbName);
+            return db.collection('users').find({_id: id}).toArray();
+        })
+        .then( (user) => {
+            if(user.length === 0) return false;
+            return true;
+
+        })
+        .catch( err => console.error(err));
     }
 
 }

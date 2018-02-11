@@ -10,6 +10,8 @@ app.set('port', process.env.PORT || 3000);
 
 //Отработка роутов
 app.use('/', router);
+app.use('/login', router);
+app.use('/checkuser', router);
 app.use('/getsales', router);
 
 

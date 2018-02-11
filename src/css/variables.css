@@ -1,0 +1,7 @@
+:root {
+    --marine: #008F9F;
+    --column: calc(100vw / 24);
+    --row: calc(100vh / 12);
+    --column-mobile: calc(100vw / 12);
+    --row-mobile: calc(100vh / 24);
+}

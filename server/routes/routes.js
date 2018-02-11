@@ -2,17 +2,46 @@ const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const multer = require('multer');
+const xlsx = require('xlsx-writestream');
+const bodyParser = require('body-parser');
+const history = require('connect-history-api-fallback');
+
 const parcer = require('./../lib/parcer');
 const db = require('./../lib/db');
-const xlsx = require('xlsx-writestream');
 
 let router = express.Router();
 let upload = multer({ dest: './public/upload/' });
 
+//Middleware
+router.use(bodyParser.json());
+router.use(history());
+
 //Главная страница
 router.get('/', (req, res, err) => {
-    if(err) console.log(err);
+    if(err) console.error(err);
     res.sendFile(path.resolve('../public/index.html'));
+});
+
+//Логин
+router.post('/login', (req, res, err) => {
+    if(err) console.error(err);
+    console.log(req.body);
+    db.login(req.body.login, req.body.password)
+    .then( (result) => {
+        res.json(result);
+    }).catch( (err) => console.error(err));
+});
+
+//Аутентификация
+router.get('/checkuser', (req, res, err) => {
+    if(err) console.error(err);
+    let token = req.get('Authorization').slice(7);
+    db.checkUser(token)
+    .then( (result) => {
+        console.log('res ' + result);
+        res.send(result);
+    })
+    .catch( (err) => console.error(err));
 });
 
 //Генериуем файл распродажи

@@ -10,9 +10,16 @@
 <body>
 
     <div id="app">
+        <template id="" v-if="authorized">
 
-        <side-menu></side-menu>
-        <router-view></router-view>
+            <side-menu></side-menu>
+            <router-view></router-view>
+
+        </template>
+
+        <template id="" v-else>
+            <router-view></router-view>
+        </template>
 
     </div>
 
