@@ -13,6 +13,7 @@ app.set('view engine', 'pug');
 app.get('/', (req, res, err) => {
     if(err) console.error(err);
     res.render('index');
+    parcer.getFeatures('6108627');
 });
 
 app.post('/sendfile', upload.single('tablefile'), (req, res, err) => {
