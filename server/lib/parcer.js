@@ -35,5 +35,16 @@ module.exports = {
         getLinks: sales,
 
         //Модуль характеристик
-        getFeatures: features
+        getFeatures(source, id) {
+            switch (source) {
+                case 'ipc2u.ru':
+                    let func = features;
+                    return func(id);
+                    break;
+                default:
+
+            }
+        },
+
+
 }

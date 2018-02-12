@@ -3,6 +3,7 @@
 :root {
     --marine: #008F9F;
     --green: #00A287;
+    --light-grey: #f6f6f9;
     --column: calc(100vw / 24);
     --row: calc(100vh / 12);
     --column-mobile: calc(100vw / 12);

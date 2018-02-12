@@ -23,7 +23,7 @@ export default {
 
     .menu {
         width: calc(var(--column) * 5);
-        height: 100%;
+        height: 100vh;
         position: relative;
     }
 
@@ -32,7 +32,7 @@ export default {
         top: 0;
         left: 0;
         height: 100vh;
-        width: calc(var(--column) * 5);
+        width: inherit;
         height: 100%;
         padding-top: calc(var(--row) * 4);
         background-image: linear-gradient(to bottom, #203756, #465E7E);
@@ -60,5 +60,6 @@ export default {
     .menu-nav a:hover {
         background-color: rgba(0,143,159,1);
     }
+
 
 </style>

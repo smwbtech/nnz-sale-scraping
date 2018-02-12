@@ -16,6 +16,7 @@ app.use('/login', router);
 app.use('/checkuser', router);
 app.use('/getsales', router);
 app.use('/salesprogress', router);
+app.use('/getschema', router);
 
 
 //Статика

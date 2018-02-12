@@ -10,6 +10,7 @@ import auth from './js/auth.js';
 import sideMenu from './vue-comp/side-menu.vue';
 import sales from './vue-comp/sales.vue';
 import login from './vue-comp/login.vue';
+import schema from './vue-comp/schema.vue';
 
 Vue.use(Router);
 
@@ -24,6 +25,14 @@ const router = new Router({
         {
             path: '/',
             component: sales,
+            meta: {
+                requiredAuth: true
+            }
+        },
+
+        {
+            path: '/schema',
+            component: schema,
             meta: {
                 requiredAuth: true
             }
@@ -68,22 +77,6 @@ router.beforeEach((to, from, next) => {
     }
 });
 
-// router.beforeEach((to, from, next) => {
-//   if (to.matched.some(record => record.meta.requiresAuth)) {
-//     // этот путь требует авторизации, проверяем залогинен ли
-//     // пользователь, и если нет, перенаправляем на страницу логина
-//     if (!auth.loggedIn()) {
-//       next({
-//         path: '/login',
-//         query: { redirect: to.fullPath }
-//       })
-//     } else {
-//       next()
-//     }
-//   } else {
-//     next() // всегда так или иначе нужно вызвать next()!
-//   }
-// })
 
 let app = new Vue({
 
@@ -92,7 +85,8 @@ let app = new Vue({
     components: {
         'side-menu': sideMenu,
         'sales': sales,
-        'login': login
+        'login': login,
+        'schema': schema
     },
 
     data: {

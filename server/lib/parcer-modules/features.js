@@ -1,10 +1,11 @@
 const puppeteer = require('puppeteer');
 const ProgressBar = require('progress');
+const config = require('./../config');
 
 function getFeatures(article) {
     return (async () => {
 
-        const browser = await puppeteer.launch({headless: false});
+        const browser = await puppeteer.launch({headless: config.headless});
         const page = await browser.newPage();
 
         //Основные селекторы nnz

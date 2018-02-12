@@ -116,5 +116,18 @@ router.get('/salesprogress', (req, res, err) => {
 
 });
 
+//Получаем схему с выбранного сайта
+router.get('/getschema', (req, res, err) => {
+    if(err) console.log(err);
+    let id = req.query.id;
+    let source = req.query.source;
+    parcer.getFeatures(source, id)
+    .then( (result) => {
+        console.log(result);
+        res.json(result);
+    })
+    .catch( (err) => console.error(err));
+});
+
 
 module.exports = router;
