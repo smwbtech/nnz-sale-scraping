@@ -1,23 +1,17 @@
 const puppeteer = require('puppeteer');
-const ProgressBar = require('progress');
+
 
 
 //В цикле обходим json и делаем запросы на сайте, получая наименование товара и ссылку на него
 
-function getLinks(jsonList) {
+function getLinks(jsonList, progressbar) {
     let res = jsonList[0];
     return (async () => {
 
         const browser = await puppeteer.launch({headless: true});
         const page = await browser.newPage();
         const linkSelector = 'div.search-results_title > a';
-        let bar = new ProgressBar('  Прогресс: [:bar] :percent', {
-            complete: '|',
-            incomplete: '.',
-            width: 20,
-            total: res.length
-        });
-        global.bar = bar;
+        let bar = progressbar;
 
         for(let i = 0; i < res.length; i++) {
             try {
@@ -36,8 +30,8 @@ function getLinks(jsonList) {
                 }, linkSelector);
 
                 res[i].link = link;
-                console.log(bar.curr);
-                console.log(bar.total);
+                // console.log(bar.curr);
+                // console.log(bar.total);
                 bar.tick();
 
                 // console.log(link);

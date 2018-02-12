@@ -7,7 +7,7 @@
             <label v-show="stage === 1" class="sale-controls__load-btn" for="tablefile">Загрузить файл</label>
             <input class="sale-controls__file" type="file" name="tablefile" id="tablefile" @change="loadFileHandler">
             <div v-show="stage === 2" class="sale-progressbar">
-                <div class="sale-progressbar__progress"></div>
+                <div :style="{width: progress.current / progress.total * 100 +'%'}" class="sale-progressbar__progress"></div>
                 <div class="sale-progressbar__bg"></div>
             </div>
             <div v-show="stage === 3" class="sale-controls-link">
@@ -27,7 +27,11 @@ export default {
     data() {
         return {
             stage: 1,
-            link: ''
+            link: '',
+            progress: {
+                total: 0,
+                current: 0
+            }
         }
     },
 
@@ -35,7 +39,7 @@ export default {
         //Загрузка файла
         loadFileHandler(e) {
             // TODO: валидация на верный формат
-            console.log(e.target.files[0]);
+            let vm = this;
             let file = e.target.files[0];
             if(file) {
                 const config = { headers: { 'Content-Type': 'multipart/form-data' } };
@@ -43,8 +47,34 @@ export default {
                 formData.append('tablefile', file, file.name);
                 this.stage = 2;
                 axios.post('/getsales', formData, config)
-                .then( (res) => console.log(res))
-                .catch( (err) => console.log(err));
+                .then( (res) => {
+
+                    let barId = res.data.bar;
+                    console.log(barId);
+                    let intervalId = setInterval( () => {
+                        axios.get(`/salesprogress?id=${barId}`)
+                        .then( (res) => {
+                            console.log(vm);
+                            console.log(vm.progress);
+                            if(res.data.current === res.data.total) {
+                                vm.progress.current = res.data.current;
+                                clearInterval(intervalId);
+                            }
+                            else {
+                                vm.progress.current = res.data.current;
+                                vm.progress.total = res.data.total;
+                            }
+
+                        })
+                        .catch( (err) => {
+                            console.log(err);
+                        })
+                    }, 1000)
+
+                })
+                .catch( (err) => {
+                    console.log(err)
+                });
             }
         }
     }
@@ -101,6 +131,9 @@ export default {
     width: 0;
     height: 100%;
     background-color: var(--green);
+    -webkit-transition: all .2s ease-in-out;
+    -o-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
 }
 
 

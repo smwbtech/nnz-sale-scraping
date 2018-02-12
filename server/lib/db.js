@@ -90,18 +90,32 @@ let db = {
 
     //Аутентификация пользователя
     checkUser(token) {
-        let id = new ObjectId(jwt.verify(token, config.secret).data);
-        return MongoClient.connect(url)
-        .then( (client) => {
-            const db = client.db(dbName);
-            return db.collection('users').find({_id: id}).toArray();
-        })
-        .then( (user) => {
-            if(user.length === 0) return false;
-            return true;
+        return new Promise( (resolve, rejected) => {
+
+            try {
+                let id = new ObjectId(jwt.verify(token, config.secret).data);
+                resolve(id);
+            }
+            catch(err) {
+                console.error(err);
+                rejected(false);
+            }
 
         })
-        .catch( err => console.error(err));
+        .then( (id) => {
+            return MongoClient.connect(url)
+            .then( (client) => {
+                const db = client.db(dbName);
+                return db.collection('users').find({_id: id}).toArray();
+            })
+            .then( (user) => {
+                if(user.length === 0) return false;
+                return true;
+
+            })
+            .catch( err => console.error(err));
+        })
+
     }
 
 }

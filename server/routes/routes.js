@@ -5,6 +5,8 @@ const multer = require('multer');
 const xlsx = require('xlsx-writestream');
 const bodyParser = require('body-parser');
 const history = require('connect-history-api-fallback');
+const ProgressBar = require('progress');
+const querystring = require('querystring');
 
 const parcer = require('./../lib/parcer');
 const db = require('./../lib/db');
@@ -14,6 +16,7 @@ let upload = multer({ dest: './public/upload/' });
 
 //Middleware
 router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: false }));
 router.use(history());
 
 //Главная страница
@@ -41,7 +44,10 @@ router.get('/checkuser', (req, res, err) => {
         console.log('res ' + result);
         res.send(result);
     })
-    .catch( (err) => console.error(err));
+    .catch( (err) => {
+        console.error(err);
+        res.send(false);
+    });
 });
 
 //Генериуем файл распродажи
@@ -55,12 +61,24 @@ router.post('/getsales', upload.single('tablefile'), (req, res, err) => {
     src.pipe(dest);
     fs.unlink(tmp_path);
     src.on('end', () => {
-        res.send('ok');
         parcer.parseFile(target_path)
-        .then( (res) => {
+        .then( (result) => {
             let date = new Date();
+            let barId = date.getTime() + '_';
+            let bar = new ProgressBar('  Прогресс: [:bar] :percent', {
+                complete: '|',
+                incomplete: '.',
+                width: 20,
+                total: result[0].length
+            });
+            bar.id = barId;
+
             console.log('Время начала:' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds());
-            return parcer.getLinks(res)
+            global.progressBars.push(bar);
+
+            res.json({bar: barId});
+
+            return parcer.getLinks(result, bar);
         })
         .then( (res) => {
             let date = new Date();
@@ -69,12 +87,24 @@ router.post('/getsales', upload.single('tablefile'), (req, res, err) => {
             xlsx.write('links.xlsx', data, (err) => {
                 if(err) console.log(err);
             });
-        });
+        })
+        .catch( (err) => console.error(err));
     });
 
 });
 
 //Показываем прогресс
+router.get('/salesprogress', (req, res, err) => {
+    if(err) console.error(err);
+    let id = req.query.id;
+    let bar = global.progressBars.find( v => v.id == id);
+    let progress = {
+        total: bar.total,
+        current: bar.curr
+    };
+    res.json(progress);
+
+});
 
 
 module.exports = router;
