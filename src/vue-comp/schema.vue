@@ -11,19 +11,51 @@
             <div class="schema-create-block">
 
                 <h2>Создание шаблона</h2>
-                <input type="text" name="" id="" placeholder="Название шаблона" v-model="title">
-                <input type="text" name="" id="" placeholder="Артикул товара" v-model="article">
+                <input class="schema-create-block__title" type="text" name="" id="" placeholder="Название шаблона" v-model="title">
+                <input class="schema-create-block__article" type="text" name="" id="" placeholder="Артикул товара" v-model="article">
                 <select name="" id="" v-model="source">
                     <option  v-for="item in resources" :value="item">{{item}}</option>
                 </select>
                 <input type="submit" value="Сгенерировать" @click.prevent="generateSchemaHanler">
                 <div class="schema-create-features">
-                    <ul class="schema-create-features-nnz">
-                        <li v-for="(feature, index) in nnzFeatures" :key="index +'nnz'">{{feature}}</li>
-                    </ul>
-                    <ul class="schema-create-features-site">
-                        <li v-for="(feature,index) in siteFeatures" :key="index +'nnz'">{{feature}}</li>
-                    </ul>
+                    <div class="schema-create-features-nnz">
+
+
+                        <template v-if="nnzFeatures.length > 0">
+
+                            <feature
+                            v-for="(item, index) in nnzFeatures"
+                            :key="item.id"
+                            :iseditable="true"
+                            :description="item.description"
+                            :featureid="item.id"
+                            :edit="item.edit"
+                            @delete-feature="deleteFeatureHandler"
+                            >
+                        </feature>
+
+                        </template>
+
+                    </div>
+
+                    <div class="schema-create-features-site">
+
+                        <template v-if="siteFeatures.length > 0">
+
+                            <feature
+                                v-for="(item, index) in siteFeatures"
+                                :key="item.id"
+                                :iseditable="false"
+                                :description="item.description"
+                                :featureid="item.id"
+                                :edit="item.edit"
+                            >
+                            </feature>
+
+                        </template>
+
+
+                    </div>
                 </div>
 
             </div>
@@ -41,7 +73,14 @@
 import axios from './../../node_modules/axios/dist/axios.js';
 import {Swappable} from '@shopify/draggable';
 
+//Компоненты
+import feature from './interface/feature-list-item.vue';
+
 export default {
+
+    components: {
+        'feature': feature
+    },
 
     data() {
         return {
@@ -58,24 +97,48 @@ export default {
     },
 
     created() {
+        let testA = [
+            {description: 'aaaaa', edit: false, id: '1nnz'},
+            {description: 'bbbb', edit: false, id: '2nnz'},
+            {description: 'cccc', edit: false, id: '3nnz'},
+            {description: 'vvvv', edit: false, id: '4nnz'},
+            {description: 'gggg', edit: false, id: '5nnz'},
+            {description: 'dddd', edit: false, id: '6nnz'},
+            {description: 'ssss', edit: false, id: '7nnz'},
+        ];
 
+        let testB = [
+            {description: 'aaaaa', edit: false, id: '1site'},
+            {description: 'bbbb', edit: false, id: '2site'},
+            {description: 'cccc', edit: false, id: '3site'},
+            {description: 'vvvv', edit: false, id: '4site'},
+            {description: 'gggg', edit: false, id: '5site'},
+            {description: 'dddd', edit: false, id: '6site'},
+            {description: 'ssss', edit: false, id: '7site'},
+        ];
+
+        this.nnzFeatures = testA;
+        this.siteFeatures = testB;
     },
 
+    //Swappable блоки
     mounted() {
         const swappableNnz = new Swappable(document.querySelectorAll('.schema-create-features-nnz'), {
-          draggable: 'li',
+          draggable: '.feature-item',
+          delay: 500
         });
         const swappableSite = new Swappable(document.querySelectorAll('.schema-create-features-site'), {
-          draggable: 'li',
+          draggable: '.feature-item',
+          delay: 500
         });
 
-        swappableNnz.on('swappable:start', () => console.log('swappable:start'))
-        swappableNnz.on('swappable:swapped', () => console.log('swappable:swapped'));
-        swappableNnz.on('swappable:stop', () => console.log('swappable:stop'));
-
-        swappableSite.on('swappable:start', () => console.log('swappable:start'))
-        swappableSite.on('swappable:swapped', () => console.log('swappable:swapped'));
-        swappableSite.on('swappable:stop', () => console.log('swappable:stop'));
+        // swappableNnz.on('swappable:start', () => console.log('swappable:start'))
+        // swappableNnz.on('swappable:swapped', () => console.log('swappable:swapped'));
+        // swappableNnz.on('swappable:stop', () => console.log('swappable:stop'));
+        //
+        // swappableSite.on('swappable:start', () => console.log('swappable:start'))
+        // swappableSite.on('swappable:swapped', () => console.log('swappable:swapped'));
+        // swappableSite.on('swappable:stop', () => console.log('swappable:stop'));
     },
 
     methods: {
@@ -85,10 +148,29 @@ export default {
             axios.get(`/getschema?source=${this.source}&id=${this.article}`)
             .then( (res) => {
                 console.log(res);
-                this.nnzFeatures = res.data.nnzFeatures;
-                this.siteFeatures = res.data.siteFeatures;
+                this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {
+                    return {
+                        description: v,
+                        edit: false,
+                        id: i + 'nnz'
+                    };
+                });
+                this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {
+                    return {
+                        description: v,
+                        edit: false,
+                        id: i + 'site'
+                    };
+                });
             })
             .catch( (err) => console.log(err));
+        },
+
+        //Удаляем свойство
+        deleteFeatureHandler(id) {
+            console.log(id);
+            this.nnzFeatures = this.nnzFeatures.filter( v => v.id !== id);
+            console.log(this.nnzFeatures);
         }
 
     }
@@ -114,6 +196,8 @@ export default {
 
     .schema-create {
         width: calc(var(--column) * 15);
+        padding-top: calc(var(--row) * 2);
+        padding-bottom: calc(var(--row) * 2);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -122,7 +206,7 @@ export default {
     .schema-create-block {
         background-color: #fff;
         border-radius: 15px;
-        width: 80%;
+        width: 90%;
         padding: 20px;
         -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);
         box-shadow: 1px 1px 4px rgba(0,0,0,.1);
@@ -147,17 +231,11 @@ export default {
         justify-content: flex-start;
         align-items: center;
         flex-flow: column;
+        -webkit-transition: all .2s ease-in-out;
+        -o-transition: all .2s ease-in-out;
+        transition: all .2s ease-in-out;
     }
 
-    .schema-create-features-nnz li,
-    .schema-create-features-site li {
-        display: block;
-        padding: 10px;
-        margin: 20px 0px;
-        -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);
-        box-shadow: 1px 1px 4px rgba(0,0,0,.1);
-        width: 80%;
-        text-align: center;
-    }
+
 
 </style>

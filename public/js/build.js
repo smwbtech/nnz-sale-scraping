@@ -2894,6 +2894,8 @@ var _axios = _interopRequireDefault(__webpack_require__(1));
 
 var _draggable = __webpack_require__(42);
 
+var _featureListItem = _interopRequireDefault(__webpack_require__(45));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //
@@ -2934,7 +2936,43 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//Компоненты
 var _default = {
+  components: {
+    'feature': _featureListItem.default
+  },
   data: function data() {
     return {
       title: '',
@@ -2945,32 +2983,84 @@ var _default = {
       siteFeatures: []
     };
   },
-  created: function created() {},
+  created: function created() {
+    var testA = [{
+      description: 'aaaaa',
+      edit: false,
+      id: '1nnz'
+    }, {
+      description: 'bbbb',
+      edit: false,
+      id: '2nnz'
+    }, {
+      description: 'cccc',
+      edit: false,
+      id: '3nnz'
+    }, {
+      description: 'vvvv',
+      edit: false,
+      id: '4nnz'
+    }, {
+      description: 'gggg',
+      edit: false,
+      id: '5nnz'
+    }, {
+      description: 'dddd',
+      edit: false,
+      id: '6nnz'
+    }, {
+      description: 'ssss',
+      edit: false,
+      id: '7nnz'
+    }];
+    var testB = [{
+      description: 'aaaaa',
+      edit: false,
+      id: '1site'
+    }, {
+      description: 'bbbb',
+      edit: false,
+      id: '2site'
+    }, {
+      description: 'cccc',
+      edit: false,
+      id: '3site'
+    }, {
+      description: 'vvvv',
+      edit: false,
+      id: '4site'
+    }, {
+      description: 'gggg',
+      edit: false,
+      id: '5site'
+    }, {
+      description: 'dddd',
+      edit: false,
+      id: '6site'
+    }, {
+      description: 'ssss',
+      edit: false,
+      id: '7site'
+    }];
+    this.nnzFeatures = testA;
+    this.siteFeatures = testB;
+  },
+  //Swappable блоки
   mounted: function mounted() {
     var swappableNnz = new _draggable.Swappable(document.querySelectorAll('.schema-create-features-nnz'), {
-      draggable: 'li'
+      draggable: '.feature-item',
+      delay: 500
     });
     var swappableSite = new _draggable.Swappable(document.querySelectorAll('.schema-create-features-site'), {
-      draggable: 'li'
-    });
-    swappableNnz.on('swappable:start', function () {
-      return console.log('swappable:start');
-    });
-    swappableNnz.on('swappable:swapped', function () {
-      return console.log('swappable:swapped');
-    });
-    swappableNnz.on('swappable:stop', function () {
-      return console.log('swappable:stop');
-    });
-    swappableSite.on('swappable:start', function () {
-      return console.log('swappable:start');
-    });
-    swappableSite.on('swappable:swapped', function () {
-      return console.log('swappable:swapped');
-    });
-    swappableSite.on('swappable:stop', function () {
-      return console.log('swappable:stop');
-    });
+      draggable: '.feature-item',
+      delay: 500
+    }); // swappableNnz.on('swappable:start', () => console.log('swappable:start'))
+    // swappableNnz.on('swappable:swapped', () => console.log('swappable:swapped'));
+    // swappableNnz.on('swappable:stop', () => console.log('swappable:stop'));
+    //
+    // swappableSite.on('swappable:start', () => console.log('swappable:start'))
+    // swappableSite.on('swappable:swapped', () => console.log('swappable:swapped'));
+    // swappableSite.on('swappable:stop', () => console.log('swappable:stop'));
   },
   methods: {
     //Получаем данные для создания шаблона
@@ -2979,11 +3069,31 @@ var _default = {
 
       _axios.default.get("/getschema?source=".concat(this.source, "&id=").concat(this.article)).then(function (res) {
         console.log(res);
-        _this.nnzFeatures = res.data.nnzFeatures;
-        _this.siteFeatures = res.data.siteFeatures;
+        _this.nnzFeatures = res.data.nnzFeatures.map(function (v, i, a) {
+          return {
+            description: v,
+            edit: false,
+            id: i + 'nnz'
+          };
+        });
+        _this.siteFeatures = res.data.siteFeatures.map(function (v, i, a) {
+          return {
+            description: v,
+            edit: false,
+            id: i + 'site'
+          };
+        });
       }).catch(function (err) {
         return console.log(err);
       });
+    },
+    //Удаляем свойство
+    deleteFeatureHandler: function deleteFeatureHandler(id) {
+      console.log(id);
+      this.nnzFeatures = this.nnzFeatures.filter(function (v) {
+        return v.id !== id;
+      });
+      console.log(this.nnzFeatures);
     }
   }
 };
@@ -17119,7 +17229,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_55efab35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_d1896c56_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__ = __webpack_require__(28);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(3);
 var disposed = false
 function injectStyle (context) {
@@ -17142,14 +17252,14 @@ var __vue_module_identifier__ = null
 
 var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_55efab35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_55efab35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_d1896c56_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_d1896c56_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__["b" /* staticRenderFns */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "src\\vue-comp\\side-menu.vue"
+Component.options.__file = "src/vue-comp/side-menu.vue"
 
 /* hot reload */
 if (false) {(function () {
@@ -17158,9 +17268,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-55efab35", Component.options)
+    hotAPI.createRecord("data-v-d1896c56", Component.options)
   } else {
-    hotAPI.reload("data-v-55efab35", Component.options)
+    hotAPI.reload("data-v-d1896c56", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -17182,13 +17292,13 @@ if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var add = __webpack_require__(2).default
-var update = add("46992774", content, false, {});
+var update = add("79fefd8c", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-55efab35\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./side-menu.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-55efab35\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./side-menu.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d1896c56\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./side-menu.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d1896c56\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./side-menu.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -17206,7 +17316,7 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.menu{width:calc(4.16667vw * 5);height:100vh;position:relative\n}\n.menu-nav{position:fixed;top:0;left:0;height:100vh;width:inherit;height:100%;padding-top:calc(8.33333vh * 4);background-image:linear-gradient(180deg,#203756,#465e7e)\n}\n.menu-nav ul{list-style:none\n}\n.menu-nav a,.menu-nav li{display:block\n}\n.menu-nav a{padding:20px 10px 20px 40px;text-decoration:none;color:#fff;background-color:rgba(0,143,159,0);transition:background-color .2s ease-in-out\n}\n.menu-nav a:hover{background-color:#008f9f\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/src/vue-comp/side-menu.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACYD,MACA,0BAAA,aACA,iBACA;CACA;AAEA,UACA,eAAA,MACA,OACA,aACA,cACA,YACA,gCACA,wDACA;CACA;AAEA,aACA,eAAA;CACA;AAMA,yBAHA,aAAA;CAYA;AATA,YAEA,4BAAA,qBACA,WACA,mCACA,2CAGA;CACA;AAEA,kBACA,wBAAA;CACA","file":"side-menu.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --light-grey: #f6f6f9;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n    <aside class=\"menu\">\r\n        <nav class=\"menu-nav\">\r\n            <ul>\r\n                <li><router-link to=\"/\">РАСПРОДАЖА</router-link></li>\r\n                <li><router-link to=\"/schema\">ШАБЛОНЫ</router-link></li>\r\n                <li><router-link to=\"/features\">ХАРАКТЕРИСТИКИ</router-link></li>\r\n            </ul>\r\n        </nav>\r\n    </aside>\r\n\r\n</template>\r\n\r\n<script>\r\nexport default {\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n    @import './../css/variables.css';\r\n\r\n    .menu {\r\n        width: calc(var(--column) * 5);\r\n        height: 100vh;\r\n        position: relative;\r\n    }\r\n\r\n    .menu-nav {\r\n        position: fixed;\r\n        top: 0;\r\n        left: 0;\r\n        height: 100vh;\r\n        width: inherit;\r\n        height: 100%;\r\n        padding-top: calc(var(--row) * 4);\r\n        background-image: linear-gradient(to bottom, #203756, #465E7E);\r\n    }\r\n\r\n    .menu-nav ul {\r\n        list-style: none;\r\n    }\r\n\r\n    .menu-nav li {\r\n        display: block;\r\n    }\r\n\r\n    .menu-nav a {\r\n        display: block;\r\n        padding: 20px 10px 20px 40px;\r\n        text-decoration: none;\r\n        color: #fff;\r\n        background-color: rgba(0,143,159,0);\r\n        -webkit-transition: background-color .2s ease-in-out;\r\n        -o-transition: background-color .2s ease-in-out;\r\n        transition: background-color .2s ease-in-out;\r\n    }\r\n\r\n    .menu-nav a:hover {\r\n        background-color: rgba(0,143,159,1);\r\n    }\r\n\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.menu{width:calc(4.16667vw * 5);height:100vh;position:relative\n}\n.menu-nav{position:fixed;top:0;left:0;height:100vh;width:inherit;height:100%;padding-top:calc(8.33333vh * 4);background-image:linear-gradient(180deg,#203756,#465e7e)\n}\n.menu-nav ul{list-style:none\n}\n.menu-nav a,.menu-nav li{display:block\n}\n.menu-nav a{padding:20px 10px 20px 40px;text-decoration:none;color:#fff;background-color:rgba(0,143,159,0);transition:background-color .2s ease-in-out\n}\n.menu-nav a:hover{background-color:#008f9f\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/side-menu.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACYD,MACA,0BAAA,aACA,iBACA;CACA;AAEA,UACA,eAAA,MACA,OACA,aACA,cACA,YACA,gCACA,wDACA;CACA;AAEA,aACA,eAAA;CACA;AAMA,yBAHA,aAAA;CAYA;AATA,YAEA,4BAAA,qBACA,WACA,mCACA,2CAGA;CACA;AAEA,kBACA,wBAAA;CACA","file":"side-menu.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <aside class=\"menu\">\n        <nav class=\"menu-nav\">\n            <ul>\n                <li><router-link to=\"/\">РАСПРОДАЖА</router-link></li>\n                <li><router-link to=\"/schema\">ШАБЛОНЫ</router-link></li>\n                <li><router-link to=\"/features\">ХАРАКТЕРИСТИКИ</router-link></li>\n            </ul>\n        </nav>\n    </aside>\n\n</template>\n\n<script>\nexport default {\n}\n</script>\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .menu {\n        width: calc(var(--column) * 5);\n        height: 100vh;\n        position: relative;\n    }\n\n    .menu-nav {\n        position: fixed;\n        top: 0;\n        left: 0;\n        height: 100vh;\n        width: inherit;\n        height: 100%;\n        padding-top: calc(var(--row) * 4);\n        background-image: linear-gradient(to bottom, #203756, #465E7E);\n    }\n\n    .menu-nav ul {\n        list-style: none;\n    }\n\n    .menu-nav li {\n        display: block;\n    }\n\n    .menu-nav a {\n        display: block;\n        padding: 20px 10px 20px 40px;\n        text-decoration: none;\n        color: #fff;\n        background-color: rgba(0,143,159,0);\n        -webkit-transition: background-color .2s ease-in-out;\n        -o-transition: background-color .2s ease-in-out;\n        transition: background-color .2s ease-in-out;\n    }\n\n    .menu-nav a:hover {\n        background-color: rgba(0,143,159,1);\n    }\n\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -17293,7 +17403,7 @@ render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-55efab35", { render: render, staticRenderFns: staticRenderFns })
+    require("vue-hot-reload-api")      .rerender("data-v-d1896c56", { render: render, staticRenderFns: staticRenderFns })
   }
 }
 
@@ -17306,7 +17416,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5ab366a8_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_8a6b8968_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(3);
 var disposed = false
 function injectStyle (context) {
@@ -17329,14 +17439,14 @@ var __vue_module_identifier__ = null
 
 var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5ab366a8_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5ab366a8_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_8a6b8968_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_8a6b8968_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__["b" /* staticRenderFns */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "src\\vue-comp\\sales.vue"
+Component.options.__file = "src/vue-comp/sales.vue"
 
 /* hot reload */
 if (false) {(function () {
@@ -17345,9 +17455,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-5ab366a8", Component.options)
+    hotAPI.createRecord("data-v-8a6b8968", Component.options)
   } else {
-    hotAPI.reload("data-v-5ab366a8", Component.options)
+    hotAPI.reload("data-v-8a6b8968", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -17369,13 +17479,13 @@ if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var add = __webpack_require__(2).default
-var update = add("80817d38", content, false, {});
+var update = add("efbd7630", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5ab366a8\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./sales.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5ab366a8\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./sales.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8a6b8968\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./sales.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8a6b8968\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./sales.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -17393,7 +17503,7 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.sale{width:calc(4.16667vw * 19);padding-left:4.16667vw;padding-right:4.16667vw;display:flex;flex-flow:column;justify-content:center;align-items:center;min-height:100vh\n}\n.sale-controls{position:relative;width:100%\n}\n.sale-controls__load-btn{position:absolute;left:35%;top:0;width:30%;height:calc(8.33333vh - 40px);padding:10px;border-radius:15px;text-align:center;background-color:#008f9f;color:#fff\n}\n.sale-controls__file{display:none\n}\n.sale-progressbar{position:absolute;left:0;top:0;width:100%;border-radius:15px;background-color:#fff;height:calc(8.33333vh - 40px);overflow:hidden\n}\n.sale-progressbar__bg,.sale-progressbar__progress{font-weight:700;text-align:center;position:absolute;top:0;left:0;width:0;height:100%\n}\n.sale-progressbar__bg{width:100%;z-index:102\n}\n.sale-progressbar__progress{z-index:101;background-color:#00a287;transition:all .2s ease-in-out\n}\n.sale-controls-link{position:absolute;left:0;top:0;width:100%;height:calc(8.33333vh - 40px);text-align:center;color:#008f9f\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/src/vue-comp/sales.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;AC+ED,MACA,2BAAA,uBACA,wBACA,aACA,iBACA,uBACA,mBACA,gBACA;CACA;AAEA,eACA,kBAAA,UACA;CACA;AAEA,yBACA,kBAAA,SACA,MACA,UACA,8BACA,aACA,mBACA,kBACA,yBACA,UACA;CACA;AAEA,qBACA,YAAA;CACA;AAEA,kBACA,kBAAA,OACA,MACA,WACA,mBACA,sBACA,8BACA,eACA;CACA;AAEA,kDAEA,gBAAA,kBACA,kBACA,MACA,OACA,QACA,WACA;CAEA;AAEA,sBACA,WAAA,WACA;CACA;AAEA,4BACA,YAAA,yBACA,8BAGA;CACA;AAEA,oBACA,kBAAA,OACA,MACA,WACA,8BACA,kBACA,aACA;CACA","file":"sales.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --light-grey: #f6f6f9;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n    <div class=\"sale\">\r\n        <p class=\"sale-info\"></p>\r\n\r\n        <div class=\"sale-controls\">\r\n            <label v-show=\"stage === 1\" class=\"sale-controls__load-btn\" for=\"tablefile\">Загрузить файл</label>\r\n            <input class=\"sale-controls__file\" type=\"file\" name=\"tablefile\" id=\"tablefile\" @change=\"loadFileHandler\">\r\n            <div v-show=\"stage === 2\" class=\"sale-progressbar\">\r\n                <p class=\"sale-progressbar__bg\">{{ Math.round(progress.current / progress.total * 100) }}%</p>\r\n                <div :style=\"{width: progress.current / progress.total * 100 +'%'}\" class=\"sale-progressbar__progress\"></div>\r\n            </div>\r\n            <div v-show=\"stage === 3\" class=\"sale-controls-link\">\r\n                <a :href=\"link\">{{link}}</a>\r\n            </div>\r\n        </div>\r\n    </div>\r\n\r\n</template>\r\n\r\n<script>\r\n\r\nimport axios from './../../node_modules/axios/dist/axios.js';\r\n\r\nexport default {\r\n\r\n    data() {\r\n        return {\r\n            stage: 1,\r\n            link: '',\r\n            progress: {\r\n                total: 1,\r\n                current: 1\r\n            }\r\n        }\r\n    },\r\n\r\n    methods: {\r\n        //Загрузка файла\r\n        loadFileHandler(e) {\r\n            // TODO: валидация на верный формат\r\n            let vm = this;\r\n            let file = e.target.files[0];\r\n            if(file) {\r\n                const config = { headers: { 'Content-Type': 'multipart/form-data' } };\r\n                let formData = new FormData();\r\n                formData.append('tablefile', file, file.name);\r\n                this.stage = 2;\r\n                axios.post('/getsales', formData, config)\r\n                .then( (res) => {\r\n\r\n                    let barId = res.data.bar;\r\n                    console.log(barId);\r\n                    let intervalId = setInterval( () => {\r\n                        axios.get(`/salesprogress?id=${barId}`)\r\n                        .then( (res) => {\r\n                            if(res.data.current === res.data.total) {\r\n                                vm.progress.current = res.data.current;\r\n                                vm.link = res.data.link;\r\n                                vm.stage = 3;\r\n                                console.log(res.data.link);\r\n                                clearInterval(intervalId);\r\n\r\n                            }\r\n                            else {\r\n                                vm.progress.current = res.data.current;\r\n                                vm.progress.total = res.data.total;\r\n                            }\r\n\r\n                        })\r\n                        .catch( (err) => {\r\n                            console.log(err);\r\n                        })\r\n                    }, 1000)\r\n\r\n                })\r\n                .catch( (err) => {\r\n                    console.log(err)\r\n                });\r\n            }\r\n        }\r\n    }\r\n\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n@import './../css/variables.css';\r\n\r\n.sale {\r\n    width: calc(var(--column)  * 19);\r\n    padding-left: var(--column);\r\n    padding-right: var(--column);\r\n    display: flex;\r\n    flex-flow: column;\r\n    justify-content: center;\r\n    align-items: center;\r\n    min-height: 100vh;\r\n}\r\n\r\n.sale-controls {\r\n    position: relative;\r\n    width: 100%;\r\n}\r\n\r\n.sale-controls__load-btn {\r\n    position: absolute;\r\n    left: 35%;\r\n    top: 0%;\r\n    width: 30%;\r\n    height: calc(var(--row) - 40px);\r\n    padding: 10px;\r\n    border-radius: 15px;\r\n    text-align: center;\r\n    background-color: var(--marine);\r\n    color: #fff;\r\n}\r\n\r\n.sale-controls__file {\r\n    display: none;\r\n}\r\n\r\n.sale-progressbar {\r\n    position: absolute;\r\n    left: 0;\r\n    top: 0;\r\n    width: 100%;\r\n    border-radius: 15px;\r\n    background-color: #fff;\r\n    height: calc(var(--row) - 40px);\r\n    overflow: hidden;\r\n}\r\n\r\n.sale-progressbar__bg,\r\n.sale-progressbar__progress {\r\n    font-weight: bold;\r\n    text-align: center;\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    width: 0;\r\n    height: 100%;\r\n\r\n}\r\n\r\n.sale-progressbar__bg {\r\n    width: 100%;\r\n    z-index: 102;\r\n}\r\n\r\n.sale-progressbar__progress {\r\n    z-index: 101;\r\n    background-color: var(--green);\r\n    -webkit-transition: all .2s ease-in-out;\r\n    -o-transition: all .2s ease-in-out;\r\n    transition: all .2s ease-in-out;\r\n}\r\n\r\n.sale-controls-link {\r\n    position: absolute;\r\n    left: 0;\r\n    top: 0;\r\n    width: 100%;\r\n    height: calc(var(--row) - 40px);\r\n    text-align: center;\r\n    color: var(--marine);\r\n}\r\n\r\n\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.sale{width:calc(4.16667vw * 19);padding-left:4.16667vw;padding-right:4.16667vw;display:flex;flex-flow:column;justify-content:center;align-items:center;min-height:100vh\n}\n.sale-controls{position:relative;width:100%\n}\n.sale-controls__load-btn{position:absolute;left:35%;top:0;width:30%;height:calc(8.33333vh - 40px);padding:10px;border-radius:15px;text-align:center;background-color:#008f9f;color:#fff\n}\n.sale-controls__file{display:none\n}\n.sale-progressbar{position:absolute;left:0;top:0;width:100%;border-radius:15px;background-color:#fff;height:calc(8.33333vh - 40px);overflow:hidden\n}\n.sale-progressbar__bg,.sale-progressbar__progress{font-weight:700;text-align:center;position:absolute;top:0;left:0;width:0;height:100%\n}\n.sale-progressbar__bg{width:100%;z-index:102\n}\n.sale-progressbar__progress{z-index:101;background-color:#00a287;transition:all .2s ease-in-out\n}\n.sale-controls-link{position:absolute;left:0;top:0;width:100%;height:calc(8.33333vh - 40px);text-align:center;color:#008f9f\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/sales.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;AC+ED,MACA,2BAAA,uBACA,wBACA,aACA,iBACA,uBACA,mBACA,gBACA;CACA;AAEA,eACA,kBAAA,UACA;CACA;AAEA,yBACA,kBAAA,SACA,MACA,UACA,8BACA,aACA,mBACA,kBACA,yBACA,UACA;CACA;AAEA,qBACA,YAAA;CACA;AAEA,kBACA,kBAAA,OACA,MACA,WACA,mBACA,sBACA,8BACA,eACA;CACA;AAEA,kDAEA,gBAAA,kBACA,kBACA,MACA,OACA,QACA,WACA;CAEA;AAEA,sBACA,WAAA,WACA;CACA;AAEA,4BACA,YAAA,yBACA,8BAGA;CACA;AAEA,oBACA,kBAAA,OACA,MACA,WACA,8BACA,kBACA,aACA;CACA","file":"sales.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <div class=\"sale\">\n        <p class=\"sale-info\"></p>\n\n        <div class=\"sale-controls\">\n            <label v-show=\"stage === 1\" class=\"sale-controls__load-btn\" for=\"tablefile\">Загрузить файл</label>\n            <input class=\"sale-controls__file\" type=\"file\" name=\"tablefile\" id=\"tablefile\" @change=\"loadFileHandler\">\n            <div v-show=\"stage === 2\" class=\"sale-progressbar\">\n                <p class=\"sale-progressbar__bg\">{{ Math.round(progress.current / progress.total * 100) }}%</p>\n                <div :style=\"{width: progress.current / progress.total * 100 +'%'}\" class=\"sale-progressbar__progress\"></div>\n            </div>\n            <div v-show=\"stage === 3\" class=\"sale-controls-link\">\n                <a :href=\"link\">{{link}}</a>\n            </div>\n        </div>\n    </div>\n\n</template>\n\n<script>\n\nimport axios from './../../node_modules/axios/dist/axios.js';\n\nexport default {\n\n    data() {\n        return {\n            stage: 1,\n            link: '',\n            progress: {\n                total: 1,\n                current: 1\n            }\n        }\n    },\n\n    methods: {\n        //Загрузка файла\n        loadFileHandler(e) {\n            // TODO: валидация на верный формат\n            let vm = this;\n            let file = e.target.files[0];\n            if(file) {\n                const config = { headers: { 'Content-Type': 'multipart/form-data' } };\n                let formData = new FormData();\n                formData.append('tablefile', file, file.name);\n                this.stage = 2;\n                axios.post('/getsales', formData, config)\n                .then( (res) => {\n\n                    let barId = res.data.bar;\n                    console.log(barId);\n                    let intervalId = setInterval( () => {\n                        axios.get(`/salesprogress?id=${barId}`)\n                        .then( (res) => {\n                            if(res.data.current === res.data.total) {\n                                vm.progress.current = res.data.current;\n                                vm.link = res.data.link;\n                                vm.stage = 3;\n                                console.log(res.data.link);\n                                clearInterval(intervalId);\n\n                            }\n                            else {\n                                vm.progress.current = res.data.current;\n                                vm.progress.total = res.data.total;\n                            }\n\n                        })\n                        .catch( (err) => {\n                            console.log(err);\n                        })\n                    }, 1000)\n\n                })\n                .catch( (err) => {\n                    console.log(err)\n                });\n            }\n        }\n    }\n\n}\n</script>\n\n<style lang=\"css\">\n\n@import './../css/variables.css';\n\n.sale {\n    width: calc(var(--column)  * 19);\n    padding-left: var(--column);\n    padding-right: var(--column);\n    display: flex;\n    flex-flow: column;\n    justify-content: center;\n    align-items: center;\n    min-height: 100vh;\n}\n\n.sale-controls {\n    position: relative;\n    width: 100%;\n}\n\n.sale-controls__load-btn {\n    position: absolute;\n    left: 35%;\n    top: 0%;\n    width: 30%;\n    height: calc(var(--row) - 40px);\n    padding: 10px;\n    border-radius: 15px;\n    text-align: center;\n    background-color: var(--marine);\n    color: #fff;\n}\n\n.sale-controls__file {\n    display: none;\n}\n\n.sale-progressbar {\n    position: absolute;\n    left: 0;\n    top: 0;\n    width: 100%;\n    border-radius: 15px;\n    background-color: #fff;\n    height: calc(var(--row) - 40px);\n    overflow: hidden;\n}\n\n.sale-progressbar__bg,\n.sale-progressbar__progress {\n    font-weight: bold;\n    text-align: center;\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 0;\n    height: 100%;\n\n}\n\n.sale-progressbar__bg {\n    width: 100%;\n    z-index: 102;\n}\n\n.sale-progressbar__progress {\n    z-index: 101;\n    background-color: var(--green);\n    -webkit-transition: all .2s ease-in-out;\n    -o-transition: all .2s ease-in-out;\n    transition: all .2s ease-in-out;\n}\n\n.sale-controls-link {\n    position: absolute;\n    left: 0;\n    top: 0;\n    width: 100%;\n    height: calc(var(--row) - 40px);\n    text-align: center;\n    color: var(--marine);\n}\n\n\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -17491,7 +17601,7 @@ render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-5ab366a8", { render: render, staticRenderFns: staticRenderFns })
+    require("vue-hot-reload-api")      .rerender("data-v-8a6b8968", { render: render, staticRenderFns: staticRenderFns })
   }
 }
 
@@ -17504,7 +17614,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_71257c89_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_59496b29_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__ = __webpack_require__(38);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(3);
 var disposed = false
 function injectStyle (context) {
@@ -17527,14 +17637,14 @@ var __vue_module_identifier__ = null
 
 var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_71257c89_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_71257c89_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_59496b29_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_59496b29_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__["b" /* staticRenderFns */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "src\\vue-comp\\login.vue"
+Component.options.__file = "src/vue-comp/login.vue"
 
 /* hot reload */
 if (false) {(function () {
@@ -17543,9 +17653,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-71257c89", Component.options)
+    hotAPI.createRecord("data-v-59496b29", Component.options)
   } else {
-    hotAPI.reload("data-v-71257c89", Component.options)
+    hotAPI.reload("data-v-59496b29", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -17567,13 +17677,13 @@ if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var add = __webpack_require__(2).default
-var update = add("49a6f81a", content, false, {});
+var update = add("f40c6fe8", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-71257c89\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./login.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-71257c89\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./login.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-59496b29\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./login.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-59496b29\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./login.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -17592,7 +17702,7 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.login{width:100%;min-height:100vh;background-image:url(" + escape(__webpack_require__(37)) + ");background-size:cover;display:flex;justify-content:center;align-items:center\n}\n.login-form{width:calc(4.16667vw * 12);padding:20px;border-radius:15px;background-color:hsla(0,0%,100%,.65);box-shadow:5px 5px 10px rgba(0,0,0,.1)\n}\n.login-form__input,.login-form__submit{display:block;margin:40px auto;width:60%;text-align:center;border:none;background-color:transparent\n}\n.login-form__input{border-bottom:2px solid #008f9f\n}\n.login-form__submit{width:40%;border-radius:15px;padding:10px 0;background-color:#008f9f;color:#fff\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/src/vue-comp/login.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACqDD,OACA,WAAA,iBACA,+CACA,sBACA,aACA,uBACA,kBACA;CACA;AAEA,YACA,2BAAA,aACA,mBACA,qCACA,sCAEA;CACA;AAEA,uCAEA,cAAA,iBACA,UACA,kBACA,YACA,4BACA;CACA;AAEA,mBACA,+BAAA;CACA;AAEA,oBACA,UAAA,mBACA,eACA,yBACA,UACA;CACA","file":"login.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --light-grey: #f6f6f9;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n  <section class=\"login\">\r\n\r\n      <form action=\"\" class=\"login-form\" @submit.prevent=\"loginHandler\">\r\n          <input class=\"login-form__input\"type=\"text\" name=\"login\" id=\"\" placeholder=\"Логин\" v-model=\"login\" required>\r\n          <input class=\"login-form__input\"type=\"password\" name=\"password\" id=\"\" placeholder=\"Пароль\" v-model=\"password\" required>\r\n          <input class=\"login-form__submit\"type=\"submit\" value=\"Войти\">\r\n          <p v-show=\"flashMessage.length > 0\">{{flashMessage}}</p>\r\n\r\n      </form>\r\n\r\n  </section>\r\n\r\n</template>\r\n\r\n<script>\r\nimport axios from './../../node_modules/axios/dist/axios.js';\r\n\r\nexport default {\r\n\r\n    data() {\r\n        return {\r\n            login: '',\r\n            password: '',\r\n            flashMessage: ''\r\n        }\r\n    },\r\n\r\n    methods: {\r\n\r\n        //Логин\r\n        loginHandler() {\r\n\r\n            let userData = {\r\n                login: this.login,\r\n                password: this.password\r\n            };\r\n\r\n            axios.post('/login', userData)\r\n            .then( (res) => {\r\n                if(res.data.status) {\r\n                    localStorage.setItem('_token', res.data.message);\r\n                    this.$router.replace('/');\r\n                }\r\n                else {\r\n                    this.flashMessage = res.data.message;\r\n                }\r\n            })\r\n            .catch( (err) => console.log(err));\r\n        }\r\n\r\n    }\r\n\r\n\r\n}\r\n</script>\r\n\r\n\r\n\r\n<style lang=\"css\">\r\n\r\n    @import './../css/variables.css';\r\n\r\n    .login {\r\n        width: 100%;\r\n        min-height: 100vh;\r\n        background-image: url('./../img/background.jpg');\r\n        background-size: cover;\r\n        display: flex;\r\n        justify-content: center;\r\n        align-items: center;\r\n    }\r\n\r\n    .login-form {\r\n        width: calc(var(--column) * 12);\r\n        padding: 20px;\r\n        border-radius: 15px;\r\n        background-color: rgba(255,255,255, .65);\r\n        -webkit-box-shadow: 5px 5px 10px rgba(0,0,0,.1);\r\n        box-shadow: 5px 5px 10px rgba(0,0,0,.1);\r\n    }\r\n\r\n    .login-form__input,\r\n    .login-form__submit {\r\n        display: block;\r\n        margin: 40px auto;\r\n        width: 60%;\r\n        text-align: center;\r\n        border: none;\r\n        background-color: rgba(0,0,0,0);\r\n    }\r\n\r\n    .login-form__input {\r\n        border-bottom: 2px solid var(--marine);\r\n    }\r\n\r\n    .login-form__submit {\r\n        width: 40%;\r\n        border-radius: 15px;\r\n        padding: 10px 0px;\r\n        background-color: var(--marine);\r\n        color: #fff;\r\n    }\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.login{width:100%;min-height:100vh;background-image:url(" + escape(__webpack_require__(37)) + ");background-size:cover;display:flex;justify-content:center;align-items:center\n}\n.login-form{width:calc(4.16667vw * 12);padding:20px;border-radius:15px;background-color:hsla(0,0%,100%,.65);box-shadow:5px 5px 10px rgba(0,0,0,.1)\n}\n.login-form__input,.login-form__submit{display:block;margin:40px auto;width:60%;text-align:center;border:none;background-color:transparent\n}\n.login-form__input{border-bottom:2px solid #008f9f\n}\n.login-form__submit{width:40%;border-radius:15px;padding:10px 0;background-color:#008f9f;color:#fff\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/login.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACqDD,OACA,WAAA,iBACA,+CACA,sBACA,aACA,uBACA,kBACA;CACA;AAEA,YACA,2BAAA,aACA,mBACA,qCACA,sCAEA;CACA;AAEA,uCAEA,cAAA,iBACA,UACA,kBACA,YACA,4BACA;CACA;AAEA,mBACA,+BAAA;CACA;AAEA,oBACA,UAAA,mBACA,eACA,yBACA,UACA;CACA","file":"login.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n  <section class=\"login\">\n\n      <form action=\"\" class=\"login-form\" @submit.prevent=\"loginHandler\">\n          <input class=\"login-form__input\"type=\"text\" name=\"login\" id=\"\" placeholder=\"Логин\" v-model=\"login\" required>\n          <input class=\"login-form__input\"type=\"password\" name=\"password\" id=\"\" placeholder=\"Пароль\" v-model=\"password\" required>\n          <input class=\"login-form__submit\"type=\"submit\" value=\"Войти\">\n          <p v-show=\"flashMessage.length > 0\">{{flashMessage}}</p>\n\n      </form>\n\n  </section>\n\n</template>\n\n<script>\nimport axios from './../../node_modules/axios/dist/axios.js';\n\nexport default {\n\n    data() {\n        return {\n            login: '',\n            password: '',\n            flashMessage: ''\n        }\n    },\n\n    methods: {\n\n        //Логин\n        loginHandler() {\n\n            let userData = {\n                login: this.login,\n                password: this.password\n            };\n\n            axios.post('/login', userData)\n            .then( (res) => {\n                if(res.data.status) {\n                    localStorage.setItem('_token', res.data.message);\n                    this.$router.replace('/');\n                }\n                else {\n                    this.flashMessage = res.data.message;\n                }\n            })\n            .catch( (err) => console.log(err));\n        }\n\n    }\n\n\n}\n</script>\n\n\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .login {\n        width: 100%;\n        min-height: 100vh;\n        background-image: url('./../img/background.jpg');\n        background-size: cover;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .login-form {\n        width: calc(var(--column) * 12);\n        padding: 20px;\n        border-radius: 15px;\n        background-color: rgba(255,255,255, .65);\n        -webkit-box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n        box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n    }\n\n    .login-form__input,\n    .login-form__submit {\n        display: block;\n        margin: 40px auto;\n        width: 60%;\n        text-align: center;\n        border: none;\n        background-color: rgba(0,0,0,0);\n    }\n\n    .login-form__input {\n        border-bottom: 2px solid var(--marine);\n    }\n\n    .login-form__submit {\n        width: 40%;\n        border-radius: 15px;\n        padding: 10px 0px;\n        background-color: var(--marine);\n        color: #fff;\n    }\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -17735,7 +17845,7 @@ render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-71257c89", { render: render, staticRenderFns: staticRenderFns })
+    require("vue-hot-reload-api")      .rerender("data-v-59496b29", { render: render, staticRenderFns: staticRenderFns })
   }
 }
 
@@ -17748,7 +17858,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_039859b1_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_vue__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_1ff23f11_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_vue__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(3);
 var disposed = false
 function injectStyle (context) {
@@ -17771,14 +17881,14 @@ var __vue_module_identifier__ = null
 
 var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_039859b1_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_vue__["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_039859b1_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_vue__["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_1ff23f11_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_1ff23f11_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_vue__["b" /* staticRenderFns */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "src\\vue-comp\\schema.vue"
+Component.options.__file = "src/vue-comp/schema.vue"
 
 /* hot reload */
 if (false) {(function () {
@@ -17787,9 +17897,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-039859b1", Component.options)
+    hotAPI.createRecord("data-v-1ff23f11", Component.options)
   } else {
-    hotAPI.reload("data-v-039859b1", Component.options)
+    hotAPI.reload("data-v-1ff23f11", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -17811,13 +17921,13 @@ if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var add = __webpack_require__(2).default
-var update = add("3286e32f", content, false, {});
+var update = add("8c4de024", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-039859b1\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./schema.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-039859b1\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./schema.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-1ff23f11\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./schema.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-1ff23f11\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./schema.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -17835,7 +17945,7 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.schema{display:flex;width:calc(4.16667vw * 19);min-height:100vh;background-color:#f6f6f9\n}\n.schema-menu{width:calc(4.16667vw * 4);background-color:#ccc\n}\n.schema-create{width:calc(4.16667vw * 15);display:flex;justify-content:center;align-items:center\n}\n.schema-create-block{background-color:#fff;border-radius:15px;width:80%;padding:20px;box-shadow:1px 1px 4px rgba(0,0,0,.1)\n}\n.schema-create-block>*{display:block;margin:20px auto\n}\n.schema-create-features{width:100%;display:flex\n}\n.schema-create-features-nnz,.schema-create-features-site{width:50%;padding:10px;list-style:none;display:flex;justify-content:flex-start;align-items:center;flex-flow:column\n}\n.schema-create-features-nnz li,.schema-create-features-site li{display:block;padding:10px;margin:20px 0;box-shadow:1px 1px 4px rgba(0,0,0,.1);width:80%;text-align:center\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/src/vue-comp/schema.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;AC2FD,QACA,aAAA,2BACA,iBACA,wBACA;CACA;AAEA,aACA,0BAAA,qBACA;CACA;AAEA,eACA,2BAAA,aACA,uBACA,kBACA;CACA;AAEA,qBACA,sBAAA,mBACA,UACA,aACA,qCAEA;CACA;AAEA,uBACA,cAAA,gBACA;CACA;AAEA,wBACA,WAAA,YACA;CACA;AAEA,yDAEA,UAAA,aACA,gBACA,aACA,2BACA,mBACA,gBACA;CACA;AAEA,+DAEA,cAAA,aACA,cACA,sCAEA,UACA,iBACA;CACA","file":"schema.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --light-grey: #f6f6f9;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n    <div class=\"schema\">\r\n\r\n        <aside class=\"schema-menu\">\r\n            <input type=\"text\" name=\"\" id=\"\">\r\n        </aside>\r\n\r\n        <div class=\"schema-create\">\r\n\r\n            <div class=\"schema-create-block\">\r\n\r\n                <h2>Создание шаблона</h2>\r\n                <input type=\"text\" name=\"\" id=\"\" placeholder=\"Название шаблона\" v-model=\"title\">\r\n                <input type=\"text\" name=\"\" id=\"\" placeholder=\"Артикул товара\" v-model=\"article\">\r\n                <select name=\"\" id=\"\" v-model=\"source\">\r\n                    <option  v-for=\"item in resources\" :value=\"item\">{{item}}</option>\r\n                </select>\r\n                <input type=\"submit\" value=\"Сгенерировать\" @click.prevent=\"generateSchemaHanler\">\r\n                <div class=\"schema-create-features\">\r\n                    <ul class=\"schema-create-features-nnz\">\r\n                        <li v-for=\"(feature, index) in nnzFeatures\" :key=\"index +'nnz'\">{{feature}}</li>\r\n                    </ul>\r\n                    <ul class=\"schema-create-features-site\">\r\n                        <li v-for=\"(feature,index) in siteFeatures\" :key=\"index +'nnz'\">{{feature}}</li>\r\n                    </ul>\r\n                </div>\r\n\r\n            </div>\r\n\r\n        </div>\r\n\r\n\r\n\r\n    </div>\r\n\r\n</template>\r\n\r\n<script>\r\n\r\nimport axios from './../../node_modules/axios/dist/axios.js';\r\nimport {Swappable} from '@shopify/draggable';\r\n\r\nexport default {\r\n\r\n    data() {\r\n        return {\r\n            title: '',\r\n            article: '',\r\n            resources: [\r\n                'ipc2u.ru'\r\n            ],\r\n            source: 'ipc2u.ru',\r\n            nnzFeatures: [],\r\n            siteFeatures: []\r\n\r\n        }\r\n    },\r\n\r\n    created() {\r\n\r\n    },\r\n\r\n    mounted() {\r\n        const swappableNnz = new Swappable(document.querySelectorAll('.schema-create-features-nnz'), {\r\n          draggable: 'li',\r\n        });\r\n        const swappableSite = new Swappable(document.querySelectorAll('.schema-create-features-site'), {\r\n          draggable: 'li',\r\n        });\r\n\r\n        swappableNnz.on('swappable:start', () => console.log('swappable:start'))\r\n        swappableNnz.on('swappable:swapped', () => console.log('swappable:swapped'));\r\n        swappableNnz.on('swappable:stop', () => console.log('swappable:stop'));\r\n\r\n        swappableSite.on('swappable:start', () => console.log('swappable:start'))\r\n        swappableSite.on('swappable:swapped', () => console.log('swappable:swapped'));\r\n        swappableSite.on('swappable:stop', () => console.log('swappable:stop'));\r\n    },\r\n\r\n    methods: {\r\n\r\n        //Получаем данные для создания шаблона\r\n        generateSchemaHanler() {\r\n            axios.get(`/getschema?source=${this.source}&id=${this.article}`)\r\n            .then( (res) => {\r\n                console.log(res);\r\n                this.nnzFeatures = res.data.nnzFeatures;\r\n                this.siteFeatures = res.data.siteFeatures;\r\n            })\r\n            .catch( (err) => console.log(err));\r\n        }\r\n\r\n    }\r\n\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n    @import './../css/variables.css';\r\n\r\n    .schema {\r\n        display: flex;\r\n        width: calc(var(--column) * 19);\r\n        min-height: 100vh;\r\n        background-color: var(--light-grey);\r\n    }\r\n\r\n    .schema-menu {\r\n        width: calc(var(--column) * 4);\r\n        background-color: #ccc;\r\n    }\r\n\r\n    .schema-create {\r\n        width: calc(var(--column) * 15);\r\n        display: flex;\r\n        justify-content: center;\r\n        align-items: center;\r\n    }\r\n\r\n    .schema-create-block {\r\n        background-color: #fff;\r\n        border-radius: 15px;\r\n        width: 80%;\r\n        padding: 20px;\r\n        -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);\r\n        box-shadow: 1px 1px 4px rgba(0,0,0,.1);\r\n    }\r\n\r\n    .schema-create-block > * {\r\n        display: block;\r\n        margin: 20px auto;\r\n    }\r\n\r\n    .schema-create-features {\r\n        width: 100%;\r\n        display: flex;\r\n    }\r\n\r\n    .schema-create-features-nnz,\r\n    .schema-create-features-site {\r\n        width: 50%;\r\n        padding: 10px;\r\n        list-style: none;\r\n        display: flex;\r\n        justify-content: flex-start;\r\n        align-items: center;\r\n        flex-flow: column;\r\n    }\r\n\r\n    .schema-create-features-nnz li,\r\n    .schema-create-features-site li {\r\n        display: block;\r\n        padding: 10px;\r\n        margin: 20px 0px;\r\n        -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);\r\n        box-shadow: 1px 1px 4px rgba(0,0,0,.1);\r\n        width: 80%;\r\n        text-align: center;\r\n    }\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.schema{display:flex;width:calc(4.16667vw * 19);min-height:100vh;background-color:#f6f6f9\n}\n.schema-menu{width:calc(4.16667vw * 4);background-color:#ccc\n}\n.schema-create{width:calc(4.16667vw * 15);padding-top:calc(8.33333vh * 2);padding-bottom:calc(8.33333vh * 2);display:flex;justify-content:center;align-items:center\n}\n.schema-create-block{background-color:#fff;border-radius:15px;width:90%;padding:20px;box-shadow:1px 1px 4px rgba(0,0,0,.1)\n}\n.schema-create-block>*{display:block;margin:20px auto\n}\n.schema-create-features{width:100%;display:flex\n}\n.schema-create-features-nnz,.schema-create-features-site{width:50%;padding:10px;list-style:none;display:flex;justify-content:flex-start;align-items:center;flex-flow:column;transition:all .2s ease-in-out\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/schema.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;AC6KD,QACA,aAAA,2BACA,iBACA,wBACA;CACA;AAEA,aACA,0BAAA,qBACA;CACA;AAEA,eACA,2BAAA,gCACA,mCACA,aACA,uBACA,kBACA;CACA;AAEA,qBACA,sBAAA,mBACA,UACA,aACA,qCAEA;CACA;AAEA,uBACA,cAAA,gBACA;CACA;AAEA,wBACA,WAAA,YACA;CACA;AAEA,yDAEA,UAAA,aACA,gBACA,aACA,2BACA,mBACA,iBACA,8BAGA;CACA","file":"schema.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <div class=\"schema\">\n\n        <aside class=\"schema-menu\">\n            <input type=\"text\" name=\"\" id=\"\">\n        </aside>\n\n        <div class=\"schema-create\">\n\n            <div class=\"schema-create-block\">\n\n                <h2>Создание шаблона</h2>\n                <input class=\"schema-create-block__title\" type=\"text\" name=\"\" id=\"\" placeholder=\"Название шаблона\" v-model=\"title\">\n                <input class=\"schema-create-block__article\" type=\"text\" name=\"\" id=\"\" placeholder=\"Артикул товара\" v-model=\"article\">\n                <select name=\"\" id=\"\" v-model=\"source\">\n                    <option  v-for=\"item in resources\" :value=\"item\">{{item}}</option>\n                </select>\n                <input type=\"submit\" value=\"Сгенерировать\" @click.prevent=\"generateSchemaHanler\">\n                <div class=\"schema-create-features\">\n                    <div class=\"schema-create-features-nnz\">\n\n\n                        <template v-if=\"nnzFeatures.length > 0\">\n\n                            <feature\n                            v-for=\"(item, index) in nnzFeatures\"\n                            :key=\"item.id\"\n                            :iseditable=\"true\"\n                            :description=\"item.description\"\n                            :featureid=\"item.id\"\n                            :edit=\"item.edit\"\n                            @delete-feature=\"deleteFeatureHandler\"\n                            >\n                        </feature>\n\n                        </template>\n\n                    </div>\n\n                    <div class=\"schema-create-features-site\">\n\n                        <template v-if=\"siteFeatures.length > 0\">\n\n                            <feature\n                                v-for=\"(item, index) in siteFeatures\"\n                                :key=\"item.id\"\n                                :iseditable=\"false\"\n                                :description=\"item.description\"\n                                :featureid=\"item.id\"\n                                :edit=\"item.edit\"\n                            >\n                            </feature>\n\n                        </template>\n\n\n                    </div>\n                </div>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n</template>\n\n<script>\n\nimport axios from './../../node_modules/axios/dist/axios.js';\nimport {Swappable} from '@shopify/draggable';\n\n//Компоненты\nimport feature from './interface/feature-list-item.vue';\n\nexport default {\n\n    components: {\n        'feature': feature\n    },\n\n    data() {\n        return {\n            title: '',\n            article: '',\n            resources: [\n                'ipc2u.ru'\n            ],\n            source: 'ipc2u.ru',\n            nnzFeatures: [],\n            siteFeatures: []\n\n        }\n    },\n\n    created() {\n        let testA = [\n            {description: 'aaaaa', edit: false, id: '1nnz'},\n            {description: 'bbbb', edit: false, id: '2nnz'},\n            {description: 'cccc', edit: false, id: '3nnz'},\n            {description: 'vvvv', edit: false, id: '4nnz'},\n            {description: 'gggg', edit: false, id: '5nnz'},\n            {description: 'dddd', edit: false, id: '6nnz'},\n            {description: 'ssss', edit: false, id: '7nnz'},\n        ];\n\n        let testB = [\n            {description: 'aaaaa', edit: false, id: '1site'},\n            {description: 'bbbb', edit: false, id: '2site'},\n            {description: 'cccc', edit: false, id: '3site'},\n            {description: 'vvvv', edit: false, id: '4site'},\n            {description: 'gggg', edit: false, id: '5site'},\n            {description: 'dddd', edit: false, id: '6site'},\n            {description: 'ssss', edit: false, id: '7site'},\n        ];\n\n        this.nnzFeatures = testA;\n        this.siteFeatures = testB;\n    },\n\n    //Swappable блоки\n    mounted() {\n        const swappableNnz = new Swappable(document.querySelectorAll('.schema-create-features-nnz'), {\n          draggable: '.feature-item',\n          delay: 500\n        });\n        const swappableSite = new Swappable(document.querySelectorAll('.schema-create-features-site'), {\n          draggable: '.feature-item',\n          delay: 500\n        });\n\n        // swappableNnz.on('swappable:start', () => console.log('swappable:start'))\n        // swappableNnz.on('swappable:swapped', () => console.log('swappable:swapped'));\n        // swappableNnz.on('swappable:stop', () => console.log('swappable:stop'));\n        //\n        // swappableSite.on('swappable:start', () => console.log('swappable:start'))\n        // swappableSite.on('swappable:swapped', () => console.log('swappable:swapped'));\n        // swappableSite.on('swappable:stop', () => console.log('swappable:stop'));\n    },\n\n    methods: {\n\n        //Получаем данные для создания шаблона\n        generateSchemaHanler() {\n            axios.get(`/getschema?source=${this.source}&id=${this.article}`)\n            .then( (res) => {\n                console.log(res);\n                this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {\n                    return {\n                        description: v,\n                        edit: false,\n                        id: i + 'nnz'\n                    };\n                });\n                this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {\n                    return {\n                        description: v,\n                        edit: false,\n                        id: i + 'site'\n                    };\n                });\n            })\n            .catch( (err) => console.log(err));\n        },\n\n        //Удаляем свойство\n        deleteFeatureHandler(id) {\n            console.log(id);\n            this.nnzFeatures = this.nnzFeatures.filter( v => v.id !== id);\n            console.log(this.nnzFeatures);\n        }\n\n    }\n\n}\n</script>\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .schema {\n        display: flex;\n        width: calc(var(--column) * 19);\n        min-height: 100vh;\n        background-color: var(--light-grey);\n    }\n\n    .schema-menu {\n        width: calc(var(--column) * 4);\n        background-color: #ccc;\n    }\n\n    .schema-create {\n        width: calc(var(--column) * 15);\n        padding-top: calc(var(--row) * 2);\n        padding-bottom: calc(var(--row) * 2);\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .schema-create-block {\n        background-color: #fff;\n        border-radius: 15px;\n        width: 90%;\n        padding: 20px;\n        -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);\n        box-shadow: 1px 1px 4px rgba(0,0,0,.1);\n    }\n\n    .schema-create-block > * {\n        display: block;\n        margin: 20px auto;\n    }\n\n    .schema-create-features {\n        width: 100%;\n        display: flex;\n    }\n\n    .schema-create-features-nnz,\n    .schema-create-features-site {\n        width: 50%;\n        padding: 10px;\n        list-style: none;\n        display: flex;\n        justify-content: flex-start;\n        align-items: center;\n        flex-flow: column;\n        -webkit-transition: all .2s ease-in-out;\n        -o-transition: all .2s ease-in-out;\n        transition: all .2s ease-in-out;\n    }\n\n\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -27125,6 +27235,7 @@ var render = function() {
               expression: "title"
             }
           ],
+          staticClass: "schema-create-block__title",
           attrs: {
             type: "text",
             name: "",
@@ -27151,6 +27262,7 @@ var render = function() {
               expression: "article"
             }
           ],
+          staticClass: "schema-create-block__article",
           attrs: {
             type: "text",
             name: "",
@@ -27215,19 +27327,46 @@ var render = function() {
         _vm._v(" "),
         _c("div", { staticClass: "schema-create-features" }, [
           _c(
-            "ul",
+            "div",
             { staticClass: "schema-create-features-nnz" },
-            _vm._l(_vm.nnzFeatures, function(feature, index) {
-              return _c("li", { key: index + "nnz" }, [_vm._v(_vm._s(feature))])
-            })
+            [
+              _vm.nnzFeatures.length > 0
+                ? _vm._l(_vm.nnzFeatures, function(item, index) {
+                    return _c("feature", {
+                      key: item.id,
+                      attrs: {
+                        iseditable: true,
+                        description: item.description,
+                        featureid: item.id,
+                        edit: item.edit
+                      },
+                      on: { "delete-feature": _vm.deleteFeatureHandler }
+                    })
+                  })
+                : _vm._e()
+            ],
+            2
           ),
           _vm._v(" "),
           _c(
-            "ul",
+            "div",
             { staticClass: "schema-create-features-site" },
-            _vm._l(_vm.siteFeatures, function(feature, index) {
-              return _c("li", { key: index + "nnz" }, [_vm._v(_vm._s(feature))])
-            })
+            [
+              _vm.siteFeatures.length > 0
+                ? _vm._l(_vm.siteFeatures, function(item, index) {
+                    return _c("feature", {
+                      key: item.id,
+                      attrs: {
+                        iseditable: false,
+                        description: item.description,
+                        featureid: item.id,
+                        edit: item.edit
+                      }
+                    })
+                  })
+                : _vm._e()
+            ],
+            2
           )
         ])
       ])
@@ -27249,9 +27388,202 @@ render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-039859b1", { render: render, staticRenderFns: staticRenderFns })
+    require("vue-hot-reload-api")      .rerender("data-v-1ff23f11", { render: render, staticRenderFns: staticRenderFns })
   }
 }
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+var _default = {
+  props: ['iseditable', 'description', 'featureid', 'edit'],
+  data: function data() {
+    return {
+      isEditable: this.iseditable,
+      name: this.description,
+      featureId: this.featureid,
+      currentEdit: this.edit
+    };
+  },
+  methods: {
+    //Удаляем запись
+    deleteHandler: function deleteHandler() {
+      this.$emit('delete-feature', this.featureId);
+    }
+  }
+};
+exports.default = _default;
+
+/***/ }),
+/* 45 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue__);
+/* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_001c1d35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_feature_list_item_vue__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(3);
+var disposed = false
+function injectStyle (context) {
+  if (disposed) return
+  __webpack_require__(46)
+}
+/* script */
+
+
+/* template */
+
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+
+var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
+  __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue___default.a,
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_001c1d35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_feature_list_item_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_001c1d35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_feature_list_item_vue__["b" /* staticRenderFns */],
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "src/vue-comp/interface/feature-list-item.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-001c1d35", Component.options)
+  } else {
+    hotAPI.reload("data-v-001c1d35", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+/* harmony default export */ __webpack_exports__["default"] = (Component.exports);
+
+
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(47);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = __webpack_require__(2).default
+var update = add("5a3fcd38", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-001c1d35\",\"scoped\":false,\"sourceMap\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./feature-list-item.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-001c1d35\",\"scoped\":false,\"sourceMap\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./feature-list-item.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var escape = __webpack_require__(36);
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
+
+// module
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.feature-item{display:flex;justify-content:space-between;margin:20px auto;width:90%;min-height:50px;box-shadow:1px 4px 6px rgba(0,143,159,.4);padding:10px\n}\n.draggable-mirror.feature-item{max-width:400px;box-shadow:0 0 6px rgba(0,143,159,.8)\n}\n.feature-item__name{width:70%;border:none;background-color:hsla(0,0%,100%,0)\n}\n.feature-item__delete{display:block;width:30px;height:30px;background:#fff;border:none;background-image:url(" + escape(__webpack_require__(49)) + ");background-position:50%;background-repeat:no-repeat\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/interface/src/vue-comp/interface/feature-list-item.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACiCD,cACA,aAAA,8BACA,iBACA,UACA,gBACA,0CAEA,YACA;CACA;AAEA,+BACA,gBAAA,qCAEA;CACA;AAEA,oBACA,UAAA,YACA,kCACA;CACA;AAEA,sBACA,cAAA,WACA,YACA,gBACA,YACA,+CACA,wBACA,2BACA;CACA","file":"feature-list-item.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <div class=\"feature-item\" :id=\"featureId\">\n        <input\n            type=\"text\"\n            name=\"feature\"\n            class=\"feature-item__name\"\n            :value=\"name\"\n            :readonly=\"!isEditable\"\n        >\n        <button v-if=\"isEditable\" class=\"feature-item__delete\" @click=\"deleteHandler\"></button>\n    </div>\n\n</template>\n\n<script>\nexport default {\n\n    props: ['iseditable', 'description', 'featureid', 'edit'],\n\n    data() {\n        return {\n            isEditable: this.iseditable,\n            name: this.description,\n            featureId: this.featureid,\n            currentEdit: this.edit\n        }\n    },\n\n    methods: {\n        //Удаляем запись\n        deleteHandler() {\n            this.$emit('delete-feature', this.featureId);\n        }\n    }\n\n\n}\n</script>\n\n<style lang=\"css\">\n\n    @import './../../css/variables.css';\n\n    .feature-item {\n        display: flex;\n        justify-content: space-between;\n        margin: 20px auto;\n        width: 90%;\n        min-height: 50px;\n        -webkit-box-shadow: 1px 4px 6px rgba(0,143,159,.4);\n        box-shadow: 1px 4px 6px rgba(0,143,159,.4);\n        padding: 10px;\n    }\n\n    .draggable-mirror.feature-item {\n        max-width: 400px;\n        -webkit-box-shadow: 0px 0px 6px rgba(0,143,159,.8);\n        box-shadow: 0px 0px 6px rgba(0,143,159,.8);\n    }\n\n    .feature-item__name {\n        width: 70%;\n        border: none;\n        background-color: rgba(255,255,255,0);\n    }\n\n    .feature-item__delete {\n        display: block;\n        width: 30px;\n        height: 30px;\n        background: #fff;\n        border: none;\n        background-image: url('./../../img/delete.svg');\n        background-position: center;\n        background-repeat: no-repeat;\n    }\n\n</style>\n"],"sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 48 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "feature-item", attrs: { id: _vm.featureId } },
+    [
+      _c("input", {
+        staticClass: "feature-item__name",
+        attrs: { type: "text", name: "feature", readonly: !_vm.isEditable },
+        domProps: { value: _vm.name }
+      }),
+      _vm._v(" "),
+      _vm.isEditable
+        ? _c("button", {
+            staticClass: "feature-item__delete",
+            on: { click: _vm.deleteHandler }
+          })
+        : _vm._e()
+    ]
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-001c1d35", { render: render, staticRenderFns: staticRenderFns })
+  }
+}
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports) {
+
+module.exports = "img/../img/delete.svg";
 
 /***/ })
 /******/ ]);
