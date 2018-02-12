@@ -21,7 +21,7 @@ function getLinks(jsonList, progressbar) {
                 await page.goto('http://new.nnz-ipc.ru/', {timeout: 30000});
                 await page.type('#search_form', res[i]['Артикул'].slice(4));
                 await page.click('.search-block__form_btn');
-                await page.waitForSelector(linkSelector, {timeout: 60000});
+                await page.waitForSelector(linkSelector, {timeout: 30000});
 
                 let link = await page.evaluate(linkSelector => {
                     let element = document.querySelector(linkSelector);

@@ -5,7 +5,7 @@
             <ul>
                 <li><router-link to="/">РАСПРОДАЖА</router-link></li>
                 <li><router-link to="/schema">ШАБЛОНЫ</router-link></li>
-                <li><router-link to="/schema">ХАРАКТЕРИСТИКИ</router-link></li>
+                <li><router-link to="/features">ХАРАКТЕРИСТИКИ</router-link></li>
             </ul>
         </nav>
     </aside>

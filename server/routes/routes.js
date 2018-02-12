@@ -55,7 +55,7 @@ router.post('/getsales', upload.single('tablefile'), (req, res, err) => {
     if(err) console.error(err);
     console.log(req.file);
     let tmp_path = req.file.path;
-    let target_path = `./public/upload/${req.file.originalname}`;
+    let target_path = path.resolve(`./../public/upload/${req.file.originalname}`);
     let src = fs.createReadStream(tmp_path);
     let dest = fs.createWriteStream(target_path);
     src.pipe(dest);
@@ -84,7 +84,7 @@ router.post('/getsales', upload.single('tablefile'), (req, res, err) => {
             let date = new Date();
             let data = res;
             console.log('Время окончания:' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds());
-            xlsx.write('links.xlsx', data, (err) => {
+            xlsx.write(path.resolve('./../public/upload/links.xlsx'), data, (err) => {
                 if(err) console.log(err);
             });
         })
@@ -98,11 +98,21 @@ router.get('/salesprogress', (req, res, err) => {
     if(err) console.error(err);
     let id = req.query.id;
     let bar = global.progressBars.find( v => v.id == id);
-    let progress = {
-        total: bar.total,
-        current: bar.curr
-    };
-    res.json(progress);
+    if(bar.total > bar.curr) {
+        let progress = {
+            total: bar.total,
+            current: bar.curr
+        };
+        res.json(progress);
+    }
+    else {
+        let progress = {
+            total: bar.total,
+            current: bar.curr,
+            link: '/upload/links.xlsx'
+        };
+        res.json(progress);
+    }
 
 });
 

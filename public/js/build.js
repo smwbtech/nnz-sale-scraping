@@ -556,537 +556,6 @@ module.exports = g;
 
 /***/ }),
 /* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony export (immutable) */ __webpack_exports__["default"] = addStylesClient;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__listToStyles__ = __webpack_require__(26);
-/*
-  MIT License http://www.opensource.org/licenses/mit-license.php
-  Author Tobias Koppers @sokra
-  Modified by Evan You @yyx990803
-*/
-
-
-
-var hasDocument = typeof document !== 'undefined'
-
-if (typeof DEBUG !== 'undefined' && DEBUG) {
-  if (!hasDocument) {
-    throw new Error(
-    'vue-style-loader cannot be used in a non-browser environment. ' +
-    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
-  ) }
-}
-
-/*
-type StyleObject = {
-  id: number;
-  parts: Array<StyleObjectPart>
-}
-
-type StyleObjectPart = {
-  css: string;
-  media: string;
-  sourceMap: ?string
-}
-*/
-
-var stylesInDom = {/*
-  [id: number]: {
-    id: number,
-    refs: number,
-    parts: Array<(obj?: StyleObjectPart) => void>
-  }
-*/}
-
-var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
-var singletonElement = null
-var singletonCounter = 0
-var isProduction = false
-var noop = function () {}
-var options = null
-var ssrIdKey = 'data-vue-ssr-id'
-
-// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-// tags it will allow on a page
-var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
-
-function addStylesClient (parentId, list, _isProduction, _options) {
-  isProduction = _isProduction
-
-  options = _options || {}
-
-  var styles = Object(__WEBPACK_IMPORTED_MODULE_0__listToStyles__["a" /* default */])(parentId, list)
-  addStylesToDom(styles)
-
-  return function update (newList) {
-    var mayRemove = []
-    for (var i = 0; i < styles.length; i++) {
-      var item = styles[i]
-      var domStyle = stylesInDom[item.id]
-      domStyle.refs--
-      mayRemove.push(domStyle)
-    }
-    if (newList) {
-      styles = Object(__WEBPACK_IMPORTED_MODULE_0__listToStyles__["a" /* default */])(parentId, newList)
-      addStylesToDom(styles)
-    } else {
-      styles = []
-    }
-    for (var i = 0; i < mayRemove.length; i++) {
-      var domStyle = mayRemove[i]
-      if (domStyle.refs === 0) {
-        for (var j = 0; j < domStyle.parts.length; j++) {
-          domStyle.parts[j]()
-        }
-        delete stylesInDom[domStyle.id]
-      }
-    }
-  }
-}
-
-function addStylesToDom (styles /* Array<StyleObject> */) {
-  for (var i = 0; i < styles.length; i++) {
-    var item = styles[i]
-    var domStyle = stylesInDom[item.id]
-    if (domStyle) {
-      domStyle.refs++
-      for (var j = 0; j < domStyle.parts.length; j++) {
-        domStyle.parts[j](item.parts[j])
-      }
-      for (; j < item.parts.length; j++) {
-        domStyle.parts.push(addStyle(item.parts[j]))
-      }
-      if (domStyle.parts.length > item.parts.length) {
-        domStyle.parts.length = item.parts.length
-      }
-    } else {
-      var parts = []
-      for (var j = 0; j < item.parts.length; j++) {
-        parts.push(addStyle(item.parts[j]))
-      }
-      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
-    }
-  }
-}
-
-function createStyleElement () {
-  var styleElement = document.createElement('style')
-  styleElement.type = 'text/css'
-  head.appendChild(styleElement)
-  return styleElement
-}
-
-function addStyle (obj /* StyleObjectPart */) {
-  var update, remove
-  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
-
-  if (styleElement) {
-    if (isProduction) {
-      // has SSR styles and in production mode.
-      // simply do nothing.
-      return noop
-    } else {
-      // has SSR styles but in dev mode.
-      // for some reason Chrome can't handle source map in server-rendered
-      // style tags - source maps in <style> only works if the style tag is
-      // created and inserted dynamically. So we remove the server rendered
-      // styles and inject new ones.
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  if (isOldIE) {
-    // use singleton mode for IE9.
-    var styleIndex = singletonCounter++
-    styleElement = singletonElement || (singletonElement = createStyleElement())
-    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
-    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
-  } else {
-    // use multi-style-tag mode in all other cases
-    styleElement = createStyleElement()
-    update = applyToTag.bind(null, styleElement)
-    remove = function () {
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  update(obj)
-
-  return function updateStyle (newObj /* StyleObjectPart */) {
-    if (newObj) {
-      if (newObj.css === obj.css &&
-          newObj.media === obj.media &&
-          newObj.sourceMap === obj.sourceMap) {
-        return
-      }
-      update(obj = newObj)
-    } else {
-      remove()
-    }
-  }
-}
-
-var replaceText = (function () {
-  var textStore = []
-
-  return function (index, replacement) {
-    textStore[index] = replacement
-    return textStore.filter(Boolean).join('\n')
-  }
-})()
-
-function applyToSingletonTag (styleElement, index, remove, obj) {
-  var css = remove ? '' : obj.css
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = replaceText(index, css)
-  } else {
-    var cssNode = document.createTextNode(css)
-    var childNodes = styleElement.childNodes
-    if (childNodes[index]) styleElement.removeChild(childNodes[index])
-    if (childNodes.length) {
-      styleElement.insertBefore(cssNode, childNodes[index])
-    } else {
-      styleElement.appendChild(cssNode)
-    }
-  }
-}
-
-function applyToTag (styleElement, obj) {
-  var css = obj.css
-  var media = obj.media
-  var sourceMap = obj.sourceMap
-
-  if (media) {
-    styleElement.setAttribute('media', media)
-  }
-  if (options.ssrId) {
-    styleElement.setAttribute(ssrIdKey, obj.id)
-  }
-
-  if (sourceMap) {
-    // https://developer.chrome.com/devtools/docs/javascript-debugging
-    // this makes source maps inside style tags work properly in Chrome
-    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
-    // http://stackoverflow.com/a/26603875
-    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
-  }
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = css
-  } else {
-    while (styleElement.firstChild) {
-      styleElement.removeChild(styleElement.firstChild)
-    }
-    styleElement.appendChild(document.createTextNode(css))
-  }
-}
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = normalizeComponent;
-/* globals __VUE_SSR_CONTEXT__ */
-
-// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
-
-function normalizeComponent (
-  scriptExports,
-  render,
-  staticRenderFns,
-  functionalTemplate,
-  injectStyles,
-  scopeId,
-  moduleIdentifier, /* server only */
-  shadowMode /* vue-cli only */
-) {
-  scriptExports = scriptExports || {}
-
-  // ES6 modules interop
-  var type = typeof scriptExports.default
-  if (type === 'object' || type === 'function') {
-    scriptExports = scriptExports.default
-  }
-
-  // Vue.extend constructor export interop
-  var options = typeof scriptExports === 'function'
-    ? scriptExports.options
-    : scriptExports
-
-  // render functions
-  if (render) {
-    options.render = render
-    options.staticRenderFns = staticRenderFns
-    options._compiled = true
-  }
-
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
-  }
-
-  // scopedId
-  if (scopeId) {
-    options._scopeId = scopeId
-  }
-
-  var hook
-  if (moduleIdentifier) { // server build
-    hook = function (context) {
-      // 2.3 injection
-      context =
-        context || // cached call
-        (this.$vnode && this.$vnode.ssrContext) || // stateful
-        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
-      // 2.2 with runInNewContext: true
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__
-      }
-      // inject component styles
-      if (injectStyles) {
-        injectStyles.call(this, context)
-      }
-      // register component module identifier for async chunk inferrence
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier)
-      }
-    }
-    // used by ssr in case component is cached and beforeCreate
-    // never gets called
-    options._ssrRegister = hook
-  } else if (injectStyles) {
-    hook = shadowMode
-      ? function () { injectStyles.call(this, this.$root.$options.shadowRoot) }
-      : injectStyles
-  }
-
-  if (hook) {
-    if (options.functional) {
-      // for template-only hot-reload because in that case the render fn doesn't
-      // go through the normalizer
-      options._injectStyles = hook
-      // register for functioal component in vue file
-      var originalRender = options.render
-      options.render = function renderWithStyleInjection (h, context) {
-        hook.call(context)
-        return originalRender(h, context)
-      }
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate
-      options.beforeCreate = existing
-        ? [].concat(existing, hook)
-        : [hook]
-    }
-  }
-
-  return {
-    exports: scriptExports,
-    options: options
-  }
-}
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-
-/***/ }),
-/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/* axios v0.17.1 | (c) 2017 by Matt Zabriskie */
@@ -2690,7 +2159,538 @@ return /******/ (function(modules) { // webpackBootstrap
 });
 ;
 //# sourceMappingURL=axios.map
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6)))
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (immutable) */ __webpack_exports__["default"] = addStylesClient;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__listToStyles__ = __webpack_require__(26);
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
+  }
+*/}
+
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+var options = null
+var ssrIdKey = 'data-vue-ssr-id'
+
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
+
+function addStylesClient (parentId, list, _isProduction, _options) {
+  isProduction = _isProduction
+
+  options = _options || {}
+
+  var styles = Object(__WEBPACK_IMPORTED_MODULE_0__listToStyles__["a" /* default */])(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
+    }
+    if (newList) {
+      styles = Object(__WEBPACK_IMPORTED_MODULE_0__listToStyles__["a" /* default */])(parentId, newList)
+      addStylesToDom(styles)
+    } else {
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
+      }
+    }
+  }
+}
+
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+  if (options.ssrId) {
+    styleElement.setAttribute(ssrIdKey, obj.id)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
+  }
+}
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = normalizeComponent;
+/* globals __VUE_SSR_CONTEXT__ */
+
+// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
+// This module is a runtime utility for cleaner component module output and will
+// be included in the final webpack user bundle.
+
+function normalizeComponent (
+  scriptExports,
+  render,
+  staticRenderFns,
+  functionalTemplate,
+  injectStyles,
+  scopeId,
+  moduleIdentifier, /* server only */
+  shadowMode /* vue-cli only */
+) {
+  scriptExports = scriptExports || {}
+
+  // ES6 modules interop
+  var type = typeof scriptExports.default
+  if (type === 'object' || type === 'function') {
+    scriptExports = scriptExports.default
+  }
+
+  // Vue.extend constructor export interop
+  var options = typeof scriptExports === 'function'
+    ? scriptExports.options
+    : scriptExports
+
+  // render functions
+  if (render) {
+    options.render = render
+    options.staticRenderFns = staticRenderFns
+    options._compiled = true
+  }
+
+  // functional template
+  if (functionalTemplate) {
+    options.functional = true
+  }
+
+  // scopedId
+  if (scopeId) {
+    options._scopeId = scopeId
+  }
+
+  var hook
+  if (moduleIdentifier) { // server build
+    hook = function (context) {
+      // 2.3 injection
+      context =
+        context || // cached call
+        (this.$vnode && this.$vnode.ssrContext) || // stateful
+        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
+      // 2.2 with runInNewContext: true
+      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+        context = __VUE_SSR_CONTEXT__
+      }
+      // inject component styles
+      if (injectStyles) {
+        injectStyles.call(this, context)
+      }
+      // register component module identifier for async chunk inferrence
+      if (context && context._registeredComponents) {
+        context._registeredComponents.add(moduleIdentifier)
+      }
+    }
+    // used by ssr in case component is cached and beforeCreate
+    // never gets called
+    options._ssrRegister = hook
+  } else if (injectStyles) {
+    hook = shadowMode
+      ? function () { injectStyles.call(this, this.$root.$options.shadowRoot) }
+      : injectStyles
+  }
+
+  if (hook) {
+    if (options.functional) {
+      // for template-only hot-reload because in that case the render fn doesn't
+      // go through the normalizer
+      options._injectStyles = hook
+      // register for functioal component in vue file
+      var originalRender = options.render
+      options.render = function renderWithStyleInjection (h, context) {
+        hook.call(context)
+        return originalRender(h, context)
+      }
+    } else {
+      // inject component registration as beforeCreate hook
+      var existing = options.beforeCreate
+      options.beforeCreate = existing
+        ? [].concat(existing, hook)
+        : [hook]
+    }
+  }
+
+  return {
+    exports: scriptExports,
+    options: options
+  }
+}
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
 
 /***/ }),
 /* 7 */
@@ -2732,7 +2732,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _axios = _interopRequireDefault(__webpack_require__(6));
+var _axios = _interopRequireDefault(__webpack_require__(3));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2762,8 +2762,8 @@ var _default = {
       stage: 1,
       link: '',
       progress: {
-        total: 0,
-        current: 0
+        total: 1,
+        current: 1
       }
     };
   },
@@ -2789,11 +2789,11 @@ var _default = {
           console.log(barId);
           var intervalId = setInterval(function () {
             _axios.default.get("/salesprogress?id=".concat(barId)).then(function (res) {
-              console.log(vm);
-              console.log(vm.progress);
-
               if (res.data.current === res.data.total) {
                 vm.progress.current = res.data.current;
+                vm.link = res.data.link;
+                vm.stage = 3;
+                console.log(res.data.link);
                 clearInterval(intervalId);
               } else {
                 vm.progress.current = res.data.current;
@@ -2824,7 +2824,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _axios = _interopRequireDefault(__webpack_require__(6));
+var _axios = _interopRequireDefault(__webpack_require__(3));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -14327,7 +14327,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(5)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(6)))
 
 /***/ }),
 /* 21 */
@@ -16978,7 +16978,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _axios = _interopRequireDefault(__webpack_require__(6));
+var _axios = _interopRequireDefault(__webpack_require__(3));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17015,8 +17015,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_d1896c56_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_55efab35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(5);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
@@ -17038,14 +17038,14 @@ var __vue_module_identifier__ = null
 
 var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_d1896c56_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_d1896c56_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_55efab35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_55efab35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__["b" /* staticRenderFns */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "src/vue-comp/side-menu.vue"
+Component.options.__file = "src\\vue-comp\\side-menu.vue"
 
 /* hot reload */
 if (false) {(function () {
@@ -17054,9 +17054,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-d1896c56", Component.options)
+    hotAPI.createRecord("data-v-55efab35", Component.options)
   } else {
-    hotAPI.reload("data-v-d1896c56", Component.options)
+    hotAPI.reload("data-v-55efab35", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -17077,14 +17077,14 @@ var content = __webpack_require__(25);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var add = __webpack_require__(3).default
-var update = add("79fefd8c", content, false, {});
+var add = __webpack_require__(4).default
+var update = add("46992774", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d1896c56\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./side-menu.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d1896c56\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./side-menu.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-55efab35\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./side-menu.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-55efab35\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./side-menu.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -17102,7 +17102,7 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.menu{height:100%;position:relative\n}\n.menu{width:calc(4.16667vw * 5)\n}\n.menu-nav{width:calc(4.16667vw * 5)\n}\n.menu-nav{position:fixed;top:0;left:0;height:100vh;height:100%;padding-top:calc(8.33333vh * 4);background-image:linear-gradient(180deg,#203756,#465e7e)\n}\n.menu-nav ul{list-style:none\n}\n.menu-nav a,.menu-nav li{display:block\n}\n.menu-nav a{padding:20px 10px 20px 40px;text-decoration:none;color:#fff;background-color:rgba(0,143,159,0);transition:background-color .2s ease-in-out\n}\n.menu-nav a:hover{background-color:#008f9f\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/side-menu.vue"],"names":[],"mappings":";AAEA,MAOI,gCAAqC;CACxC;ACaD,MAEA,YAAA,iBACA;CACA;AAEA,MALA,yBAAA;CAcA;AATA,UALA,yBAAA;CAcA;AATA,UACA,eAAA,MACA,OACA,aACA,YAEA,gCACA,wDACA;CACA;AAEA,aACA,eAAA;CACA;AAMA,yBAHA,aAAA;CAYA;AATA,YAEA,4BAAA,qBACA,WACA,mCACA,2CAGA;CACA;AAEA,kBACA,wBAAA;CACA","file":"side-menu.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <aside class=\"menu\">\n        <nav class=\"menu-nav\">\n            <ul>\n                <li><router-link to=\"/\">РАСПРОДАЖА</router-link></li>\n                <li><router-link to=\"/schema\">ШАБЛОНЫ</router-link></li>\n                <li><router-link to=\"/schema\">ХАРАКТЕРИСТИКИ</router-link></li>\n            </ul>\n        </nav>\n    </aside>\n\n</template>\n\n<script>\nexport default {\n}\n</script>\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .menu {\n        width: calc(var(--column) * 5);\n        height: 100%;\n        position: relative;\n    }\n\n    .menu-nav {\n        position: fixed;\n        top: 0;\n        left: 0;\n        height: 100vh;\n        width: calc(var(--column) * 5);\n        height: 100%;\n        padding-top: calc(var(--row) * 4);\n        background-image: linear-gradient(to bottom, #203756, #465E7E);\n    }\n\n    .menu-nav ul {\n        list-style: none;\n    }\n\n    .menu-nav li {\n        display: block;\n    }\n\n    .menu-nav a {\n        display: block;\n        padding: 20px 10px 20px 40px;\n        text-decoration: none;\n        color: #fff;\n        background-color: rgba(0,143,159,0);\n        -webkit-transition: background-color .2s ease-in-out;\n        -o-transition: background-color .2s ease-in-out;\n        transition: background-color .2s ease-in-out;\n    }\n\n    .menu-nav a:hover {\n        background-color: rgba(0,143,159,1);\n    }\n\n</style>\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.menu{height:100%;position:relative\n}\n.menu{width:calc(4.16667vw * 5)\n}\n.menu-nav{width:calc(4.16667vw * 5)\n}\n.menu-nav{position:fixed;top:0;left:0;height:100vh;height:100%;padding-top:calc(8.33333vh * 4);background-image:linear-gradient(180deg,#203756,#465e7e)\n}\n.menu-nav ul{list-style:none\n}\n.menu-nav a,.menu-nav li{display:block\n}\n.menu-nav a{padding:20px 10px 20px 40px;text-decoration:none;color:#fff;background-color:rgba(0,143,159,0);transition:background-color .2s ease-in-out\n}\n.menu-nav a:hover{background-color:#008f9f\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/src/vue-comp/side-menu.vue"],"names":[],"mappings":";AAEA,MAOI,gCAAqC;CACxC;ACaD,MAEA,YAAA,iBACA;CACA;AAEA,MALA,yBAAA;CAcA;AATA,UALA,yBAAA;CAcA;AATA,UACA,eAAA,MACA,OACA,aACA,YAEA,gCACA,wDACA;CACA;AAEA,aACA,eAAA;CACA;AAMA,yBAHA,aAAA;CAYA;AATA,YAEA,4BAAA,qBACA,WACA,mCACA,2CAGA;CACA;AAEA,kBACA,wBAAA;CACA","file":"side-menu.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n    <aside class=\"menu\">\r\n        <nav class=\"menu-nav\">\r\n            <ul>\r\n                <li><router-link to=\"/\">РАСПРОДАЖА</router-link></li>\r\n                <li><router-link to=\"/schema\">ШАБЛОНЫ</router-link></li>\r\n                <li><router-link to=\"/features\">ХАРАКТЕРИСТИКИ</router-link></li>\r\n            </ul>\r\n        </nav>\r\n    </aside>\r\n\r\n</template>\r\n\r\n<script>\r\nexport default {\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n    @import './../css/variables.css';\r\n\r\n    .menu {\r\n        width: calc(var(--column) * 5);\r\n        height: 100%;\r\n        position: relative;\r\n    }\r\n\r\n    .menu-nav {\r\n        position: fixed;\r\n        top: 0;\r\n        left: 0;\r\n        height: 100vh;\r\n        width: calc(var(--column) * 5);\r\n        height: 100%;\r\n        padding-top: calc(var(--row) * 4);\r\n        background-image: linear-gradient(to bottom, #203756, #465E7E);\r\n    }\r\n\r\n    .menu-nav ul {\r\n        list-style: none;\r\n    }\r\n\r\n    .menu-nav li {\r\n        display: block;\r\n    }\r\n\r\n    .menu-nav a {\r\n        display: block;\r\n        padding: 20px 10px 20px 40px;\r\n        text-decoration: none;\r\n        color: #fff;\r\n        background-color: rgba(0,143,159,0);\r\n        -webkit-transition: background-color .2s ease-in-out;\r\n        -o-transition: background-color .2s ease-in-out;\r\n        transition: background-color .2s ease-in-out;\r\n    }\r\n\r\n    .menu-nav a:hover {\r\n        background-color: rgba(0,143,159,1);\r\n    }\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -17173,7 +17173,7 @@ var render = function() {
         _c(
           "li",
           [
-            _c("router-link", { attrs: { to: "/schema" } }, [
+            _c("router-link", { attrs: { to: "/features" } }, [
               _vm._v("ХАРАКТЕРИСТИКИ")
             ])
           ],
@@ -17189,7 +17189,7 @@ render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-d1896c56", { render: render, staticRenderFns: staticRenderFns })
+    require("vue-hot-reload-api")      .rerender("data-v-55efab35", { render: render, staticRenderFns: staticRenderFns })
   }
 }
 
@@ -17202,8 +17202,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_8a6b8968_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__ = __webpack_require__(31);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5ab366a8_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(5);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
@@ -17225,14 +17225,14 @@ var __vue_module_identifier__ = null
 
 var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_8a6b8968_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_8a6b8968_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5ab366a8_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5ab366a8_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__["b" /* staticRenderFns */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "src/vue-comp/sales.vue"
+Component.options.__file = "src\\vue-comp\\sales.vue"
 
 /* hot reload */
 if (false) {(function () {
@@ -17241,9 +17241,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-8a6b8968", Component.options)
+    hotAPI.createRecord("data-v-5ab366a8", Component.options)
   } else {
-    hotAPI.reload("data-v-8a6b8968", Component.options)
+    hotAPI.reload("data-v-5ab366a8", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -17264,14 +17264,14 @@ var content = __webpack_require__(30);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var add = __webpack_require__(3).default
-var update = add("efbd7630", content, false, {});
+var add = __webpack_require__(4).default
+var update = add("80817d38", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8a6b8968\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./sales.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8a6b8968\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./sales.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5ab366a8\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./sales.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5ab366a8\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./sales.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -17289,7 +17289,7 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.sale{padding-left:4.16667vw;display:flex;flex-flow:column;width:100%;min-height:100%\n}\n.sale-controls{position:relative;width:100%\n}\n.sale-controls__load-btn{position:absolute;left:35%;top:0;width:30%;height:8.33333vh;padding:10px;border-radius:15px;text-align:center;background-color:#008f9f;color:#fff\n}\n.sale-controls__file{display:none\n}\n.sale-progressbar{position:absolute;left:0;top:0;width:100%;border-radius:15px;background-color:#fff;height:8.33333vh;overflow:hidden\n}\n.sale-progressbar__progress{width:0;height:100%;background-color:#00a287;transition:all .2s ease-in-out\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/sales.vue"],"names":[],"mappings":";AAEA,MAOI,gCAAqC;CACxC;AC8ED,MACA,uBAAA,aACA,iBACA,WACA,eACA;CACA;AAEA,eACA,kBAAA,UACA;CACA;AAEA,yBACA,kBAAA,SACA,MACA,UACA,iBACA,aACA,mBACA,kBACA,yBACA,UACA;CACA;AAEA,qBACA,YAAA;CACA;AAEA,kBACA,kBAAA,OACA,MACA,WACA,mBACA,sBACA,iBACA,eACA;CACA;AAEA,4BACA,QAAA,YACA,yBACA,8BAGA;CACA","file":"sales.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <div class=\"sale\">\n        <p class=\"sale-info\"></p>\n\n        <div class=\"sale-controls\">\n            <label v-show=\"stage === 1\" class=\"sale-controls__load-btn\" for=\"tablefile\">Загрузить файл</label>\n            <input class=\"sale-controls__file\" type=\"file\" name=\"tablefile\" id=\"tablefile\" @change=\"loadFileHandler\">\n            <div v-show=\"stage === 2\" class=\"sale-progressbar\">\n                <div :style=\"{width: progress.current / progress.total * 100 +'%'}\" class=\"sale-progressbar__progress\"></div>\n                <div class=\"sale-progressbar__bg\"></div>\n            </div>\n            <div v-show=\"stage === 3\" class=\"sale-controls-link\">\n                <a :href=\"link\">{{link}}</a>\n            </div>\n        </div>\n    </div>\n\n</template>\n\n<script>\n\nimport axios from './../../node_modules/axios/dist/axios.js';\n\nexport default {\n\n    data() {\n        return {\n            stage: 1,\n            link: '',\n            progress: {\n                total: 0,\n                current: 0\n            }\n        }\n    },\n\n    methods: {\n        //Загрузка файла\n        loadFileHandler(e) {\n            // TODO: валидация на верный формат\n            let vm = this;\n            let file = e.target.files[0];\n            if(file) {\n                const config = { headers: { 'Content-Type': 'multipart/form-data' } };\n                let formData = new FormData();\n                formData.append('tablefile', file, file.name);\n                this.stage = 2;\n                axios.post('/getsales', formData, config)\n                .then( (res) => {\n\n                    let barId = res.data.bar;\n                    console.log(barId);\n                    let intervalId = setInterval( () => {\n                        axios.get(`/salesprogress?id=${barId}`)\n                        .then( (res) => {\n                            console.log(vm);\n                            console.log(vm.progress);\n                            if(res.data.current === res.data.total) {\n                                vm.progress.current = res.data.current;\n                                clearInterval(intervalId);\n                            }\n                            else {\n                                vm.progress.current = res.data.current;\n                                vm.progress.total = res.data.total;\n                            }\n\n                        })\n                        .catch( (err) => {\n                            console.log(err);\n                        })\n                    }, 1000)\n\n                })\n                .catch( (err) => {\n                    console.log(err)\n                });\n            }\n        }\n    }\n\n}\n</script>\n\n<style lang=\"css\">\n\n@import './../css/variables.css';\n\n.sale {\n    padding-left: var(--column);\n    display: flex;\n    flex-flow: column;\n    width: 100%;\n    min-height: 100%;\n}\n\n.sale-controls {\n    position: relative;\n    width: 100%;\n}\n\n.sale-controls__load-btn {\n    position: absolute;\n    left: 35%;\n    top: 0%;\n    width: 30%;\n    height: var(--row);\n    padding: 10px;\n    border-radius: 15px;\n    text-align: center;\n    background-color: var(--marine);\n    color: #fff;\n}\n\n.sale-controls__file {\n    display: none;\n}\n\n.sale-progressbar {\n    position: absolute;\n    left: 0;\n    top: 0;\n    width: 100%;\n    border-radius: 15px;\n    background-color: #fff;\n    height: var(--row);\n    overflow: hidden;\n}\n\n.sale-progressbar__progress {\n    width: 0;\n    height: 100%;\n    background-color: var(--green);\n    -webkit-transition: all .2s ease-in-out;\n    -o-transition: all .2s ease-in-out;\n    transition: all .2s ease-in-out;\n}\n\n\n\n</style>\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.sale{width:calc(4.16667vw * 19);padding-left:4.16667vw;padding-right:4.16667vw;display:flex;flex-flow:column;justify-content:center;align-items:center;min-height:100vh\n}\n.sale-controls{position:relative;width:100%\n}\n.sale-controls__load-btn{position:absolute;left:35%;top:0;width:30%;height:calc(8.33333vh - 40px);padding:10px;border-radius:15px;text-align:center;background-color:#008f9f;color:#fff\n}\n.sale-controls__file{display:none\n}\n.sale-progressbar{position:absolute;left:0;top:0;width:100%;border-radius:15px;background-color:#fff;height:calc(8.33333vh - 40px);overflow:hidden\n}\n.sale-progressbar__bg,.sale-progressbar__progress{font-weight:700;text-align:center;position:absolute;top:0;left:0;width:0;height:100%\n}\n.sale-progressbar__bg{width:100%;z-index:102\n}\n.sale-progressbar__progress{z-index:101;background-color:#00a287;transition:all .2s ease-in-out\n}\n.sale-controls-link{position:absolute;left:0;top:0;width:100%;height:calc(8.33333vh - 40px);text-align:center;color:#008f9f\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/src/vue-comp/sales.vue"],"names":[],"mappings":";AAEA,MAOI,gCAAqC;CACxC;ACgFD,MACA,2BAAA,uBACA,wBACA,aACA,iBACA,uBACA,mBACA,gBACA;CACA;AAEA,eACA,kBAAA,UACA;CACA;AAEA,yBACA,kBAAA,SACA,MACA,UACA,8BACA,aACA,mBACA,kBACA,yBACA,UACA;CACA;AAEA,qBACA,YAAA;CACA;AAEA,kBACA,kBAAA,OACA,MACA,WACA,mBACA,sBACA,8BACA,eACA;CACA;AAEA,kDAEA,gBAAA,kBACA,kBACA,MACA,OACA,QACA,WACA;CAEA;AAEA,sBACA,WAAA,WACA;CACA;AAEA,4BACA,YAAA,yBACA,8BAGA;CACA;AAEA,oBACA,kBAAA,OACA,MACA,WACA,8BACA,kBACA,aACA;CACA","file":"sales.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n    <div class=\"sale\">\r\n        <p class=\"sale-info\"></p>\r\n\r\n        <div class=\"sale-controls\">\r\n            <label v-show=\"stage === 1\" class=\"sale-controls__load-btn\" for=\"tablefile\">Загрузить файл</label>\r\n            <input class=\"sale-controls__file\" type=\"file\" name=\"tablefile\" id=\"tablefile\" @change=\"loadFileHandler\">\r\n            <div v-show=\"stage === 2\" class=\"sale-progressbar\">\r\n                <p class=\"sale-progressbar__bg\">{{ Math.round(progress.current / progress.total * 100) }}%</p>\r\n                <div :style=\"{width: progress.current / progress.total * 100 +'%'}\" class=\"sale-progressbar__progress\"></div>\r\n            </div>\r\n            <div v-show=\"stage === 3\" class=\"sale-controls-link\">\r\n                <a :href=\"link\">{{link}}</a>\r\n            </div>\r\n        </div>\r\n    </div>\r\n\r\n</template>\r\n\r\n<script>\r\n\r\nimport axios from './../../node_modules/axios/dist/axios.js';\r\n\r\nexport default {\r\n\r\n    data() {\r\n        return {\r\n            stage: 1,\r\n            link: '',\r\n            progress: {\r\n                total: 1,\r\n                current: 1\r\n            }\r\n        }\r\n    },\r\n\r\n    methods: {\r\n        //Загрузка файла\r\n        loadFileHandler(e) {\r\n            // TODO: валидация на верный формат\r\n            let vm = this;\r\n            let file = e.target.files[0];\r\n            if(file) {\r\n                const config = { headers: { 'Content-Type': 'multipart/form-data' } };\r\n                let formData = new FormData();\r\n                formData.append('tablefile', file, file.name);\r\n                this.stage = 2;\r\n                axios.post('/getsales', formData, config)\r\n                .then( (res) => {\r\n\r\n                    let barId = res.data.bar;\r\n                    console.log(barId);\r\n                    let intervalId = setInterval( () => {\r\n                        axios.get(`/salesprogress?id=${barId}`)\r\n                        .then( (res) => {\r\n                            if(res.data.current === res.data.total) {\r\n                                vm.progress.current = res.data.current;\r\n                                vm.link = res.data.link;\r\n                                vm.stage = 3;\r\n                                console.log(res.data.link);\r\n                                clearInterval(intervalId);\r\n\r\n                            }\r\n                            else {\r\n                                vm.progress.current = res.data.current;\r\n                                vm.progress.total = res.data.total;\r\n                            }\r\n\r\n                        })\r\n                        .catch( (err) => {\r\n                            console.log(err);\r\n                        })\r\n                    }, 1000)\r\n\r\n                })\r\n                .catch( (err) => {\r\n                    console.log(err)\r\n                });\r\n            }\r\n        }\r\n    }\r\n\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n@import './../css/variables.css';\r\n\r\n.sale {\r\n    width: calc(var(--column)  * 19);\r\n    padding-left: var(--column);\r\n    padding-right: var(--column);\r\n    display: flex;\r\n    flex-flow: column;\r\n    justify-content: center;\r\n    align-items: center;\r\n    min-height: 100vh;\r\n}\r\n\r\n.sale-controls {\r\n    position: relative;\r\n    width: 100%;\r\n}\r\n\r\n.sale-controls__load-btn {\r\n    position: absolute;\r\n    left: 35%;\r\n    top: 0%;\r\n    width: 30%;\r\n    height: calc(var(--row) - 40px);\r\n    padding: 10px;\r\n    border-radius: 15px;\r\n    text-align: center;\r\n    background-color: var(--marine);\r\n    color: #fff;\r\n}\r\n\r\n.sale-controls__file {\r\n    display: none;\r\n}\r\n\r\n.sale-progressbar {\r\n    position: absolute;\r\n    left: 0;\r\n    top: 0;\r\n    width: 100%;\r\n    border-radius: 15px;\r\n    background-color: #fff;\r\n    height: calc(var(--row) - 40px);\r\n    overflow: hidden;\r\n}\r\n\r\n.sale-progressbar__bg,\r\n.sale-progressbar__progress {\r\n    font-weight: bold;\r\n    text-align: center;\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    width: 0;\r\n    height: 100%;\r\n\r\n}\r\n\r\n.sale-progressbar__bg {\r\n    width: 100%;\r\n    z-index: 102;\r\n}\r\n\r\n.sale-progressbar__progress {\r\n    z-index: 101;\r\n    background-color: var(--green);\r\n    -webkit-transition: all .2s ease-in-out;\r\n    -o-transition: all .2s ease-in-out;\r\n    transition: all .2s ease-in-out;\r\n}\r\n\r\n.sale-controls-link {\r\n    position: absolute;\r\n    left: 0;\r\n    top: 0;\r\n    width: 100%;\r\n    height: calc(var(--row) - 40px);\r\n    text-align: center;\r\n    color: var(--marine);\r\n}\r\n\r\n\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -17346,14 +17346,20 @@ var render = function() {
           staticClass: "sale-progressbar"
         },
         [
+          _c("p", { staticClass: "sale-progressbar__bg" }, [
+            _vm._v(
+              _vm._s(
+                Math.round(_vm.progress.current / _vm.progress.total * 100)
+              ) + "%"
+            )
+          ]),
+          _vm._v(" "),
           _c("div", {
             staticClass: "sale-progressbar__progress",
             style: {
               width: _vm.progress.current / _vm.progress.total * 100 + "%"
             }
-          }),
-          _vm._v(" "),
-          _c("div", { staticClass: "sale-progressbar__bg" })
+          })
         ]
       ),
       _vm._v(" "),
@@ -17381,7 +17387,7 @@ render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-8a6b8968", { render: render, staticRenderFns: staticRenderFns })
+    require("vue-hot-reload-api")      .rerender("data-v-5ab366a8", { render: render, staticRenderFns: staticRenderFns })
   }
 }
 
@@ -17394,8 +17400,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_59496b29_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__ = __webpack_require__(37);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_71257c89_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(5);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
@@ -17417,14 +17423,14 @@ var __vue_module_identifier__ = null
 
 var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_59496b29_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_59496b29_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_71257c89_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_71257c89_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__["b" /* staticRenderFns */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "src/vue-comp/login.vue"
+Component.options.__file = "src\\vue-comp\\login.vue"
 
 /* hot reload */
 if (false) {(function () {
@@ -17433,9 +17439,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-59496b29", Component.options)
+    hotAPI.createRecord("data-v-71257c89", Component.options)
   } else {
-    hotAPI.reload("data-v-59496b29", Component.options)
+    hotAPI.reload("data-v-71257c89", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -17456,14 +17462,14 @@ var content = __webpack_require__(34);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var add = __webpack_require__(3).default
-var update = add("f40c6fe8", content, false, {});
+var add = __webpack_require__(4).default
+var update = add("49a6f81a", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-59496b29\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./login.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-59496b29\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./login.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-71257c89\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./login.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-71257c89\",\"scoped\":false,\"sourceMap\":true}!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./login.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -17482,7 +17488,7 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.login{width:100%;min-height:100vh;background-image:url(" + escape(__webpack_require__(36)) + ");background-size:cover;display:flex;justify-content:center;align-items:center\n}\n.login-form{width:calc(4.16667vw * 12);padding:20px;border-radius:15px;background-color:hsla(0,0%,100%,.65);box-shadow:5px 5px 10px rgba(0,0,0,.1)\n}\n.login-form__input,.login-form__submit{display:block;margin:40px auto;width:60%;text-align:center;border:none;background-color:transparent\n}\n.login-form__input{border-bottom:2px solid #008f9f\n}\n.login-form__submit{width:40%;border-radius:15px;padding:10px 0;background-color:#008f9f;color:#fff\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/login.vue"],"names":[],"mappings":";AAEA,MAOI,gCAAqC;CACxC;ACsDD,OACA,WAAA,iBACA,+CACA,sBACA,aACA,uBACA,kBACA;CACA;AAEA,YACA,2BAAA,aACA,mBACA,qCACA,sCAEA;CACA;AAEA,uCAEA,cAAA,iBACA,UACA,kBACA,YACA,4BACA;CACA;AAEA,mBACA,+BAAA;CACA;AAEA,oBACA,UAAA,mBACA,eACA,yBACA,UACA;CACA","file":"login.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n  <section class=\"login\">\n\n      <form action=\"\" class=\"login-form\" @submit.prevent=\"loginHandler\">\n          <input class=\"login-form__input\"type=\"text\" name=\"login\" id=\"\" placeholder=\"Логин\" v-model=\"login\" required>\n          <input class=\"login-form__input\"type=\"password\" name=\"password\" id=\"\" placeholder=\"Пароль\" v-model=\"password\" required>\n          <input class=\"login-form__submit\"type=\"submit\" value=\"Войти\">\n          <p v-show=\"flashMessage.length > 0\">{{flashMessage}}</p>\n\n      </form>\n\n  </section>\n\n</template>\n\n<script>\nimport axios from './../../node_modules/axios/dist/axios.js';\n\nexport default {\n\n    data() {\n        return {\n            login: '',\n            password: '',\n            flashMessage: ''\n        }\n    },\n\n    methods: {\n\n        //Логин\n        loginHandler() {\n\n            let userData = {\n                login: this.login,\n                password: this.password\n            };\n\n            axios.post('/login', userData)\n            .then( (res) => {\n                if(res.data.status) {\n                    localStorage.setItem('_token', res.data.message);\n                    this.$router.replace('/');\n                }\n                else {\n                    this.flashMessage = res.data.message;\n                }\n            })\n            .catch( (err) => console.log(err));\n        }\n\n    }\n\n\n}\n</script>\n\n\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .login {\n        width: 100%;\n        min-height: 100vh;\n        background-image: url('./../img/background.jpg');\n        background-size: cover;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .login-form {\n        width: calc(var(--column) * 12);\n        padding: 20px;\n        border-radius: 15px;\n        background-color: rgba(255,255,255, .65);\n        -webkit-box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n        box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n    }\n\n    .login-form__input,\n    .login-form__submit {\n        display: block;\n        margin: 40px auto;\n        width: 60%;\n        text-align: center;\n        border: none;\n        background-color: rgba(0,0,0,0);\n    }\n\n    .login-form__input {\n        border-bottom: 2px solid var(--marine);\n    }\n\n    .login-form__submit {\n        width: 40%;\n        border-radius: 15px;\n        padding: 10px 0px;\n        background-color: var(--marine);\n        color: #fff;\n    }\n\n</style>\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.login{width:100%;min-height:100vh;background-image:url(" + escape(__webpack_require__(36)) + ");background-size:cover;display:flex;justify-content:center;align-items:center\n}\n.login-form{width:calc(4.16667vw * 12);padding:20px;border-radius:15px;background-color:hsla(0,0%,100%,.65);box-shadow:5px 5px 10px rgba(0,0,0,.1)\n}\n.login-form__input,.login-form__submit{display:block;margin:40px auto;width:60%;text-align:center;border:none;background-color:transparent\n}\n.login-form__input{border-bottom:2px solid #008f9f\n}\n.login-form__submit{width:40%;border-radius:15px;padding:10px 0;background-color:#008f9f;color:#fff\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/src/vue-comp/login.vue"],"names":[],"mappings":";AAEA,MAOI,gCAAqC;CACxC;ACsDD,OACA,WAAA,iBACA,+CACA,sBACA,aACA,uBACA,kBACA;CACA;AAEA,YACA,2BAAA,aACA,mBACA,qCACA,sCAEA;CACA;AAEA,uCAEA,cAAA,iBACA,UACA,kBACA,YACA,4BACA;CACA;AAEA,mBACA,+BAAA;CACA;AAEA,oBACA,UAAA,mBACA,eACA,yBACA,UACA;CACA","file":"login.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n  <section class=\"login\">\r\n\r\n      <form action=\"\" class=\"login-form\" @submit.prevent=\"loginHandler\">\r\n          <input class=\"login-form__input\"type=\"text\" name=\"login\" id=\"\" placeholder=\"Логин\" v-model=\"login\" required>\r\n          <input class=\"login-form__input\"type=\"password\" name=\"password\" id=\"\" placeholder=\"Пароль\" v-model=\"password\" required>\r\n          <input class=\"login-form__submit\"type=\"submit\" value=\"Войти\">\r\n          <p v-show=\"flashMessage.length > 0\">{{flashMessage}}</p>\r\n\r\n      </form>\r\n\r\n  </section>\r\n\r\n</template>\r\n\r\n<script>\r\nimport axios from './../../node_modules/axios/dist/axios.js';\r\n\r\nexport default {\r\n\r\n    data() {\r\n        return {\r\n            login: '',\r\n            password: '',\r\n            flashMessage: ''\r\n        }\r\n    },\r\n\r\n    methods: {\r\n\r\n        //Логин\r\n        loginHandler() {\r\n\r\n            let userData = {\r\n                login: this.login,\r\n                password: this.password\r\n            };\r\n\r\n            axios.post('/login', userData)\r\n            .then( (res) => {\r\n                if(res.data.status) {\r\n                    localStorage.setItem('_token', res.data.message);\r\n                    this.$router.replace('/');\r\n                }\r\n                else {\r\n                    this.flashMessage = res.data.message;\r\n                }\r\n            })\r\n            .catch( (err) => console.log(err));\r\n        }\r\n\r\n    }\r\n\r\n\r\n}\r\n</script>\r\n\r\n\r\n\r\n<style lang=\"css\">\r\n\r\n    @import './../css/variables.css';\r\n\r\n    .login {\r\n        width: 100%;\r\n        min-height: 100vh;\r\n        background-image: url('./../img/background.jpg');\r\n        background-size: cover;\r\n        display: flex;\r\n        justify-content: center;\r\n        align-items: center;\r\n    }\r\n\r\n    .login-form {\r\n        width: calc(var(--column) * 12);\r\n        padding: 20px;\r\n        border-radius: 15px;\r\n        background-color: rgba(255,255,255, .65);\r\n        -webkit-box-shadow: 5px 5px 10px rgba(0,0,0,.1);\r\n        box-shadow: 5px 5px 10px rgba(0,0,0,.1);\r\n    }\r\n\r\n    .login-form__input,\r\n    .login-form__submit {\r\n        display: block;\r\n        margin: 40px auto;\r\n        width: 60%;\r\n        text-align: center;\r\n        border: none;\r\n        background-color: rgba(0,0,0,0);\r\n    }\r\n\r\n    .login-form__input {\r\n        border-bottom: 2px solid var(--marine);\r\n    }\r\n\r\n    .login-form__submit {\r\n        width: 40%;\r\n        border-radius: 15px;\r\n        padding: 10px 0px;\r\n        background-color: var(--marine);\r\n        color: #fff;\r\n    }\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -17625,7 +17631,7 @@ render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-59496b29", { render: render, staticRenderFns: staticRenderFns })
+    require("vue-hot-reload-api")      .rerender("data-v-71257c89", { render: render, staticRenderFns: staticRenderFns })
   }
 }
 
