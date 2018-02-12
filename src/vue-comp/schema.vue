@@ -13,10 +13,11 @@
                 <h2>Создание шаблона</h2>
                 <input class="schema-create-block__title" type="text" name="" id="" placeholder="Название шаблона" v-model="title">
                 <input class="schema-create-block__article" type="text" name="" id="" placeholder="Артикул товара" v-model="article">
-                <select name="" id="" v-model="source">
+                <label class="schema-create-block__label" for="source">Выберите источник:</label>
+                <select class="schema-create-block__select" name="source" id="source" v-model="source">
                     <option  v-for="item in resources" :value="item">{{item}}</option>
                 </select>
-                <input type="submit" value="Сгенерировать" @click.prevent="generateSchemaHanler">
+                <input class="schema-create-block__submit" type="submit" value="Сгенерировать" @click.prevent="generateSchemaHanler">
                 <div class="schema-create-features">
                     <div class="schema-create-features-nnz">
 
@@ -210,11 +211,13 @@ export default {
         padding: 20px;
         -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);
         box-shadow: 1px 1px 4px rgba(0,0,0,.1);
+        -webkit-transition: all .3s ease-in;
+        -o-transition: all .3s ease-in;
+        transition: all .3s ease-in;
     }
 
-    .schema-create-block > * {
-        display: block;
-        margin: 20px auto;
+    .schema-create-block {
+        margin-bottom: 40px;
     }
 
     .schema-create-features {
@@ -234,6 +237,37 @@ export default {
         -webkit-transition: all .2s ease-in-out;
         -o-transition: all .2s ease-in-out;
         transition: all .2s ease-in-out;
+    }
+
+    .schema-create-block__title,
+    .schema-create-block__article {
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid var(--marine);
+        margin-bottom: 40px;
+        padding-bottom: 10px;
+    }
+
+    .schema-create-block__label,
+    .schema-create-block__select {
+        display: inline-block;
+        margin-right: 40px;
+    }
+
+    .schema-create-block__select {
+        background-color: #fff;
+        border: 1px solid var(--marine);
+    }
+
+    .schema-create-block__submit {
+        display: block;
+        width: 40%;
+        border-radius: 15px;
+        padding: 10px 0px;
+        margin: 40px auto;
+        background-color: var(--green);
+        color: #fff;
+        box-shadow: none;
     }
 
 
