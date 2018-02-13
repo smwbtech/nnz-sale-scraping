@@ -134,8 +134,22 @@ router.post('/saveschma', (req, res, err) => {
     if(err) console.error(err);
     let token = req.get('Authorization').slice(7);
     let schema = req.body;
-    console.log(schema);
-    res.send('ok');
+    db.saveSchema(token, schema)
+    .then( (result) => {
+        let responseObj = {
+            success: true,
+            data: result.ops[0]
+        };
+        res.send(responseObj);
+    })
+    .catch( (err) => {
+        let responseObj = {
+            success: false,
+            data: 'Ошибка соединения с базой данных'
+        };
+        res.send(responseObj);
+    });
+
 });
 
 

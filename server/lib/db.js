@@ -85,7 +85,9 @@ let db = {
                     }
                 });
             })
-            .catch( (err) => console.error(err));
+            .catch( (err) =>  {
+                return err;
+            });
     },
 
     //Аутентификация пользователя
@@ -120,7 +122,20 @@ let db = {
 
     //Сохранение данных в БД
     saveSchema(token, schema) {
-        
+        let id = jwt.decode(token).data;
+        let dbUserId = new ObjectId(id);
+        let schemaObj = {
+            userId: id,
+            data: schema
+        };
+        return MongoClient.connect(url)
+        .then( (client) => {
+            const db = client.db(dbName);
+            return db.collection('schemas').insert(schemaObj);
+        })
+        .catch ( (err) => {
+            return err;
+        });
     }
 
 }
