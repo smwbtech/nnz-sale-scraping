@@ -9,7 +9,7 @@ export default {
                 rejected(false);
             }
             else {
-                let token = localStorage.getItem('_token')
+                let token = localStorage.getItem('_token');
                 axios.get('/checkuser', {
                     headers: {
                         'Authorization': `Bearer ${token}`

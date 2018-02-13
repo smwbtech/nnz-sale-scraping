@@ -116,6 +116,11 @@ let db = {
             .catch( err => console.error(err));
         })
 
+    },
+
+    //Сохранение данных в БД
+    saveSchema(token, schema) {
+        
     }
 
 }

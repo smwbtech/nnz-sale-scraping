@@ -129,5 +129,14 @@ router.get('/getschema', (req, res, err) => {
     .catch( (err) => console.error(err));
 });
 
+//Сохраняем схему созданную пользователем
+router.post('/saveschma', (req, res, err) => {
+    if(err) console.error(err);
+    let token = req.get('Authorization').slice(7);
+    let schema = req.body;
+    console.log(schema);
+    res.send('ok');
+});
+
 
 module.exports = router;

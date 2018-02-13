@@ -17,7 +17,8 @@
                 <select class="schema-create-block__select" name="source" id="source" v-model="source">
                     <option  v-for="item in resources" :value="item">{{item}}</option>
                 </select>
-                <input class="schema-create-block__submit" type="submit" value="Сгенерировать" @click.prevent="generateSchemaHanler">
+                <input class="schema-create-block__submit" type="submit" value="Сгенерировать" v-if="stage === 1" @click.prevent="generateSchemaHanler">
+                <loading v-if="stage === 2"></loading>
                 <div class="schema-create-features">
                     <div class="schema-create-features-nnz">
 
@@ -107,28 +108,29 @@ export default {
     },
 
     created() {
-        let testA = [
-            {description: 'aaaaa', edit: false, id: '1nnz'},
-            {description: 'bbbb', edit: false, id: '2nnz'},
-            {description: 'cccc', edit: false, id: '3nnz'},
-            {description: 'vvvv', edit: false, id: '4nnz'},
-            {description: 'gggg', edit: false, id: '5nnz'},
-            {description: 'dddd', edit: false, id: '6nnz'},
-            {description: 'ssss', edit: false, id: '7nnz'},
-        ];
-
-        let testB = [
-            {description: 'aaaaa', edit: false, id: '1site'},
-            {description: 'bbbb', edit: false, id: '2site'},
-            {description: 'cccc', edit: false, id: '3site'},
-            {description: 'vvvv', edit: false, id: '4site'},
-            {description: 'gggg', edit: false, id: '5site'},
-            {description: 'dddd', edit: false, id: '6site'},
-            {description: 'ssss', edit: false, id: '7site'},
-        ];
-
-        this.nnzFeatures = testA;
-        this.siteFeatures = testB;
+        //TODO: delete
+        // let testA = [
+        //     {description: 'aaaaa', edit: false, id: '1nnz'},
+        //     {description: 'bbbb', edit: false, id: '2nnz'},
+        //     {description: 'cccc', edit: false, id: '3nnz'},
+        //     {description: 'vvvv', edit: false, id: '4nnz'},
+        //     {description: 'gggg', edit: false, id: '5nnz'},
+        //     {description: 'dddd', edit: false, id: '6nnz'},
+        //     {description: 'ssss', edit: false, id: '7nnz'},
+        // ];
+        //
+        // let testB = [
+        //     {description: 'aaaaa', edit: false, id: '1site'},
+        //     {description: 'bbbb', edit: false, id: '2site'},
+        //     {description: 'cccc', edit: false, id: '3site'},
+        //     {description: 'vvvv', edit: false, id: '4site'},
+        //     {description: 'gggg', edit: false, id: '5site'},
+        //     {description: 'dddd', edit: false, id: '6site'},
+        //     {description: 'ssss', edit: false, id: '7site'},
+        // ];
+        //
+        // this.nnzFeatures = testA;
+        // this.siteFeatures = testB;
     },
 
     //Swappable блоки
@@ -155,6 +157,7 @@ export default {
 
         //Получаем данные для создания шаблона
         generateSchemaHanler() {
+            this.stage = 2
             axios.get(`/getschema?source=${this.source}&id=${this.article}`)
             .then( (res) => {
                 console.log(res);
@@ -172,6 +175,7 @@ export default {
                         id: i + 'site'
                     };
                 });
+                this.stage = 3;
             })
             .catch( (err) => console.log(err));
         },
@@ -192,7 +196,26 @@ export default {
 
         //Сохраняем схему
         saveSchemaHandler() {
+            let token = localStorage.getItem('_token');
+            let nnzFeatures = document.querySelectorAll('.schema-create-features-nnz .feature-item input');
+            let siteFeatures = document.querySelectorAll('.schema-create-features-site .feature-item input');
+            let regExpArr = Array.prototype.slice.call(siteFeatures, 0, nnzFeatures.length);
+            let schema = {};
 
+            for(let i = 0; i < nnzFeatures.length; i++) {
+                schema[nnzFeatures[i].value] = regExpArr[i].value;
+            }
+
+            axios({
+                method: 'post',
+                url: '/saveschma',
+                data: schema,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then( (res) => console.log(res))
+            .catch( (err) => console.log(err));
         }
 
     }
