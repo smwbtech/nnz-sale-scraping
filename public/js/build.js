@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 15);
+/******/ 	return __webpack_require__(__webpack_require__.s = 16);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -152,7 +152,7 @@ function toComment(sourceMap) {
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["default"] = addStylesClient;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__listToStyles__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__listToStyles__ = __webpack_require__(32);
 /*
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra
@@ -2160,7 +2160,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(18);
+var	fixUrls = __webpack_require__(19);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -2871,7 +2871,7 @@ var _default = {
     return {
       login: '',
       password: '',
-      flashMessage: ''
+      flashMsg: ''
     };
   },
   methods: {
@@ -2885,6 +2885,8 @@ var _default = {
       };
 
       _axios.default.post('/login', userData).then(function (res) {
+        console.log(res);
+
         if (res.data.status) {
           localStorage.setItem('_token', res.data.message);
 
@@ -2914,16 +2916,22 @@ exports.default = void 0;
 
 var _axios = _interopRequireDefault(__webpack_require__(3));
 
-var _draggable = __webpack_require__(46);
+var _draggable = __webpack_require__(47);
 
-var _featureListItem = _interopRequireDefault(__webpack_require__(47));
+var _validation = _interopRequireDefault(__webpack_require__(48));
 
-var _schemaAside = _interopRequireDefault(__webpack_require__(52));
+var _featureListItem = _interopRequireDefault(__webpack_require__(49));
 
-var _loadingIndicator = _interopRequireDefault(__webpack_require__(56));
+var _schemaAside = _interopRequireDefault(__webpack_require__(54));
+
+var _loadingIndicator = _interopRequireDefault(__webpack_require__(58));
+
+var _flashMessage = _interopRequireDefault(__webpack_require__(62));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//
+//
 //
 //
 //
@@ -3005,7 +3013,8 @@ var _default = {
   components: {
     'feature': _featureListItem.default,
     'aside-search': _schemaAside.default,
-    'loading': _loadingIndicator.default
+    'loading': _loadingIndicator.default,
+    'flash-message': _flashMessage.default
   },
   data: function data() {
     return {
@@ -3015,7 +3024,8 @@ var _default = {
       resources: ['ipc2u.ru'],
       source: 'ipc2u.ru',
       nnzFeatures: [],
-      siteFeatures: []
+      siteFeatures: [],
+      flashMsg: ''
     };
   },
   created: function created() {//TODO: delete
@@ -3060,32 +3070,45 @@ var _default = {
     // swappableSite.on('swappable:stop', () => console.log('swappable:stop'));
   },
   methods: {
+    //flashMessage
+    showFlashMessage: function showFlashMessage(msg) {
+      var vm = this;
+      this.flashMsg = msg;
+      setTimeout(function () {
+        return vm.flashMsg = '';
+      }, 8000);
+    },
     //Получаем данные для создания шаблона
     generateSchemaHanler: function generateSchemaHanler() {
       var _this = this;
 
-      this.stage = 2;
+      if (_validation.default.checkArticle(this.article)) {
+        this.stage = 2;
 
-      _axios.default.get("/getschema?source=".concat(this.source, "&id=").concat(this.article)).then(function (res) {
-        console.log(res);
-        _this.nnzFeatures = res.data.nnzFeatures.map(function (v, i, a) {
-          return {
-            description: v,
-            edit: false,
-            id: i + 'nnz'
-          };
+        _axios.default.get("/getschema?source=".concat(this.source, "&id=").concat(this.article)).then(function (res) {
+          console.log(res);
+          _this.nnzFeatures = res.data.nnzFeatures.map(function (v, i, a) {
+            return {
+              description: v,
+              edit: false,
+              id: i + 'nnz'
+            };
+          });
+          _this.siteFeatures = res.data.siteFeatures.map(function (v, i, a) {
+            return {
+              description: v,
+              edit: false,
+              id: i + 'site'
+            };
+          });
+          _this.stage = 3;
+        }).catch(function (err) {
+          return console.log(err);
         });
-        _this.siteFeatures = res.data.siteFeatures.map(function (v, i, a) {
-          return {
-            description: v,
-            edit: false,
-            id: i + 'site'
-          };
-        });
-        _this.stage = 3;
-      }).catch(function (err) {
-        return console.log(err);
-      });
+      } else {
+        var msg = "Поле артикул должно быть заполнено. Допускаются только цифры, длинна значения не менее 5 символов";
+        this.showFlashMessage(msg);
+      }
     },
     //Добавляем свойство
     addFeatureHandler: function addFeatureHandler() {
@@ -3246,25 +3269,62 @@ exports.default = _default;
 "use strict";
 
 
-var _variables = _interopRequireDefault(__webpack_require__(16));
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+//
+//
+//
+//
+//
+//
+//
+//
+var _default = {
+  props: ['message'],
+  computed: {
+    text: function text() {
+      return this.message;
+    },
+    //Показываем сообщение, если в компонент посупил текс
+    flashMessage: function flashMessage() {
+      return {
+        'flashMessage': true,
+        'flashMessage_inactive': this.text.length === 0,
+        'flashMessage_active': this.text.length > 0
+      };
+    }
+  }
+};
+exports.default = _default;
 
-var _normalize = _interopRequireDefault(__webpack_require__(19));
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
 
-var _style = _interopRequireDefault(__webpack_require__(21));
+"use strict";
 
-var _vue = _interopRequireDefault(__webpack_require__(23));
 
-var _vueRouter = _interopRequireDefault(__webpack_require__(26));
+var _variables = _interopRequireDefault(__webpack_require__(17));
 
-var _auth = _interopRequireDefault(__webpack_require__(27));
+var _normalize = _interopRequireDefault(__webpack_require__(20));
 
-var _sideMenu = _interopRequireDefault(__webpack_require__(28));
+var _style = _interopRequireDefault(__webpack_require__(22));
 
-var _sales = _interopRequireDefault(__webpack_require__(33));
+var _vue = _interopRequireDefault(__webpack_require__(24));
 
-var _login = _interopRequireDefault(__webpack_require__(37));
+var _vueRouter = _interopRequireDefault(__webpack_require__(27));
 
-var _schema = _interopRequireDefault(__webpack_require__(42));
+var _auth = _interopRequireDefault(__webpack_require__(28));
+
+var _sideMenu = _interopRequireDefault(__webpack_require__(29));
+
+var _sales = _interopRequireDefault(__webpack_require__(34));
+
+var _login = _interopRequireDefault(__webpack_require__(38));
+
+var _schema = _interopRequireDefault(__webpack_require__(43));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3332,11 +3392,11 @@ var app = new _vue.default({
 }).$mount('#app');
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(17);
+var content = __webpack_require__(18);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -3382,7 +3442,7 @@ if(false) {
 }
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(false);
@@ -3396,7 +3456,7 @@ exports.push([module.i, ":root{font-family:Open Sans,sans-serif}", ""]);
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 
@@ -3491,11 +3551,11 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(20);
+var content = __webpack_require__(21);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -3541,7 +3601,7 @@ if(false) {
 }
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(false);
@@ -3555,11 +3615,11 @@ exports.push([module.i, "/*! normalize.css v8.0.0 | MIT License | github.com/nec
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(22);
+var content = __webpack_require__(23);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -3605,7 +3665,7 @@ if(false) {
 }
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(false);
@@ -3619,7 +3679,7 @@ exports.push([module.i, ":root{font-family:Open Sans,sans-serif}*,:after,:before
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
@@ -14421,10 +14481,10 @@ return Vue$3;
 
 })));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5), __webpack_require__(24).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5), __webpack_require__(25).setImmediate))
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var apply = Function.prototype.apply;
@@ -14477,7 +14537,7 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(25);
+__webpack_require__(26);
 // On some exotic environments, it's not clear which object `setimmeidate` was
 // able to install onto.  Search each possibility in the same order as the
 // `setimmediate` library.
@@ -14491,7 +14551,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -14684,7 +14744,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5), __webpack_require__(7)))
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -17321,7 +17381,7 @@ return VueRouter;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17361,7 +17421,7 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17369,12 +17429,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_side_menu_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_d1896c56_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_d1896c56_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_side_menu_vue__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(2);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
-  __webpack_require__(29)
+  __webpack_require__(30)
 }
 /* script */
 
@@ -17421,13 +17481,13 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(30);
+var content = __webpack_require__(31);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -17448,7 +17508,7 @@ if(false) {
 }
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(true);
@@ -17462,7 +17522,7 @@ exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.menu{widt
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17497,7 +17557,7 @@ function listToStyles (parentId, list) {
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17548,7 +17608,7 @@ if (false) {
 }
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17556,12 +17616,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sales_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_8a6b8968_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_8a6b8968_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sales_vue__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(2);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
-  __webpack_require__(34)
+  __webpack_require__(35)
 }
 /* script */
 
@@ -17608,13 +17668,13 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(35);
+var content = __webpack_require__(36);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -17635,7 +17695,7 @@ if(false) {
 }
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(true);
@@ -17649,7 +17709,7 @@ exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.sale{widt
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17746,7 +17806,7 @@ if (false) {
 }
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17754,12 +17814,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_login_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_59496b29_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_59496b29_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_login_vue__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(2);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
-  __webpack_require__(38)
+  __webpack_require__(39)
 }
 /* script */
 
@@ -17806,13 +17866,13 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(39);
+var content = __webpack_require__(40);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -17833,7 +17893,7 @@ if(false) {
 }
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var escape = __webpack_require__(6);
@@ -17842,19 +17902,19 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.login{width:100%;min-height:100vh;background-image:url(" + escape(__webpack_require__(40)) + ");background-size:cover;display:flex;justify-content:center;align-items:center\n}\n.login-form{width:calc(4.16667vw * 12);padding:20px;border-radius:15px;background-color:hsla(0,0%,100%,.65);box-shadow:5px 5px 10px rgba(0,0,0,.1)\n}\n.login-form__input,.login-form__submit{display:block;margin:40px auto;width:60%;text-align:center;border:none;background-color:transparent\n}\n.login-form__input{border-bottom:2px solid #008f9f\n}\n.login-form__submit{width:40%;border-radius:15px;padding:10px 0;background-color:#008f9f;color:#fff\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/login.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACqDD,OACA,WAAA,iBACA,+CACA,sBACA,aACA,uBACA,kBACA;CACA;AAEA,YACA,2BAAA,aACA,mBACA,qCACA,sCAEA;CACA;AAEA,uCAEA,cAAA,iBACA,UACA,kBACA,YACA,4BACA;CACA;AAEA,mBACA,+BAAA;CACA;AAEA,oBACA,UAAA,mBACA,eACA,yBACA,UACA;CACA","file":"login.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n  <section class=\"login\">\n\n      <form action=\"\" class=\"login-form\" @submit.prevent=\"loginHandler\">\n          <input class=\"login-form__input\"type=\"text\" name=\"login\" id=\"\" placeholder=\"Логин\" v-model=\"login\" required>\n          <input class=\"login-form__input\"type=\"password\" name=\"password\" id=\"\" placeholder=\"Пароль\" v-model=\"password\" required>\n          <input class=\"login-form__submit\"type=\"submit\" value=\"Войти\">\n          <p v-show=\"flashMessage.length > 0\">{{flashMessage}}</p>\n\n      </form>\n\n  </section>\n\n</template>\n\n<script>\nimport axios from './../../node_modules/axios/dist/axios.js';\n\nexport default {\n\n    data() {\n        return {\n            login: '',\n            password: '',\n            flashMessage: ''\n        }\n    },\n\n    methods: {\n\n        //Логин\n        loginHandler() {\n\n            let userData = {\n                login: this.login,\n                password: this.password\n            };\n\n            axios.post('/login', userData)\n            .then( (res) => {\n                if(res.data.status) {\n                    localStorage.setItem('_token', res.data.message);\n                    this.$router.replace('/');\n                }\n                else {\n                    this.flashMessage = res.data.message;\n                }\n            })\n            .catch( (err) => console.log(err));\n        }\n\n    }\n\n\n}\n</script>\n\n\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .login {\n        width: 100%;\n        min-height: 100vh;\n        background-image: url('./../img/background.jpg');\n        background-size: cover;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .login-form {\n        width: calc(var(--column) * 12);\n        padding: 20px;\n        border-radius: 15px;\n        background-color: rgba(255,255,255, .65);\n        -webkit-box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n        box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n    }\n\n    .login-form__input,\n    .login-form__submit {\n        display: block;\n        margin: 40px auto;\n        width: 60%;\n        text-align: center;\n        border: none;\n        background-color: rgba(0,0,0,0);\n    }\n\n    .login-form__input {\n        border-bottom: 2px solid var(--marine);\n    }\n\n    .login-form__submit {\n        width: 40%;\n        border-radius: 15px;\n        padding: 10px 0px;\n        background-color: var(--marine);\n        color: #fff;\n    }\n\n</style>\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.login{width:100%;min-height:100vh;background-image:url(" + escape(__webpack_require__(41)) + ");background-size:cover;display:flex;justify-content:center;align-items:center\n}\n.login-form{width:calc(4.16667vw * 12);padding:20px;border-radius:15px;background-color:hsla(0,0%,100%,.65);box-shadow:5px 5px 10px rgba(0,0,0,.1)\n}\n.login-form__input,.login-form__submit{display:block;margin:40px auto;width:60%;text-align:center;border:none;background-color:transparent\n}\n.login-form__input{border-bottom:2px solid #008f9f\n}\n.login-form__submit{width:40%;border-radius:15px;padding:10px 0;background-color:#008f9f;color:#fff\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/login.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACsDD,OACA,WAAA,iBACA,+CACA,sBACA,aACA,uBACA,kBACA;CACA;AAEA,YACA,2BAAA,aACA,mBACA,qCACA,sCAEA;CACA;AAEA,uCAEA,cAAA,iBACA,UACA,kBACA,YACA,4BACA;CACA;AAEA,mBACA,+BAAA;CACA;AAEA,oBACA,UAAA,mBACA,eACA,yBACA,UACA;CACA","file":"login.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n  <section class=\"login\">\n\n      <form action=\"\" class=\"login-form\" @submit.prevent=\"loginHandler\">\n          <input class=\"login-form__input\"type=\"text\" name=\"login\" id=\"\" placeholder=\"Логин\" v-model=\"login\" required>\n          <input class=\"login-form__input\"type=\"password\" name=\"password\" id=\"\" placeholder=\"Пароль\" v-model=\"password\" required>\n          <input class=\"login-form__submit\"type=\"submit\" value=\"Войти\">\n          <p v-show=\"flashMsg.length > 0\">{{flashMsg}}</p>\n\n      </form>\n\n  </section>\n\n</template>\n\n<script>\nimport axios from './../../node_modules/axios/dist/axios.js';\n\nexport default {\n\n    data() {\n        return {\n            login: '',\n            password: '',\n            flashMsg: ''\n        }\n    },\n\n    methods: {\n\n        //Логин\n        loginHandler() {\n\n            let userData = {\n                login: this.login,\n                password: this.password\n            };\n\n            axios.post('/login', userData)\n            .then( (res) => {\n                console.log(res);\n                if(res.data.status) {\n                    localStorage.setItem('_token', res.data.message);\n                    this.$router.replace('/');\n                }\n                else {\n                    this.flashMessage = res.data.message;\n                }\n            })\n            .catch( (err) => console.log(err));\n        }\n\n    }\n\n\n}\n</script>\n\n\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .login {\n        width: 100%;\n        min-height: 100vh;\n        background-image: url('./../img/background.jpg');\n        background-size: cover;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .login-form {\n        width: calc(var(--column) * 12);\n        padding: 20px;\n        border-radius: 15px;\n        background-color: rgba(255,255,255, .65);\n        -webkit-box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n        box-shadow: 5px 5px 10px rgba(0,0,0,.1);\n    }\n\n    .login-form__input,\n    .login-form__submit {\n        display: block;\n        margin: 40px auto;\n        width: 60%;\n        text-align: center;\n        border: none;\n        background-color: rgba(0,0,0,0);\n    }\n\n    .login-form__input {\n        border-bottom: 2px solid var(--marine);\n    }\n\n    .login-form__submit {\n        width: 40%;\n        border-radius: 15px;\n        padding: 10px 0px;\n        background-color: var(--marine);\n        color: #fff;\n    }\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports) {
 
 module.exports = "img/../img/background.jpg";
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17946,12 +18006,12 @@ var render = function() {
               {
                 name: "show",
                 rawName: "v-show",
-                value: _vm.flashMessage.length > 0,
-                expression: "flashMessage.length > 0"
+                value: _vm.flashMsg.length > 0,
+                expression: "flashMsg.length > 0"
               }
             ]
           },
-          [_vm._v(_vm._s(_vm.flashMessage))]
+          [_vm._v(_vm._s(_vm.flashMsg))]
         )
       ]
     )
@@ -17968,7 +18028,7 @@ if (false) {
 }
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17976,12 +18036,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_1ff23f11_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_vue__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_1ff23f11_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_vue__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(2);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
-  __webpack_require__(43)
+  __webpack_require__(44)
 }
 /* script */
 
@@ -18028,13 +18088,13 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(44);
+var content = __webpack_require__(45);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -18055,7 +18115,7 @@ if(false) {
 }
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var escape = __webpack_require__(6);
@@ -18064,19 +18124,19 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.schema{display:flex;width:calc(4.16667vw * 19);min-height:100vh;background-color:#f6f6f9\n}\n.schema-create{width:calc(4.16667vw * 15);padding-top:calc(8.33333vh * 2);padding-bottom:calc(8.33333vh * 2);display:flex;justify-content:center;align-items:center\n}\n.schema-create-block{background-color:#fff;border-radius:15px;width:90%;padding:20px;box-shadow:1px 1px 4px rgba(0,0,0,.1);transition:all .3s ease-in;margin-bottom:40px\n}\n.schema-create-features{width:100%;display:flex\n}\n.schema-create-features-nnz,.schema-create-features-site{width:50%;padding:10px;list-style:none;display:flex;justify-content:flex-start;align-items:center;flex-flow:column;transition:all .2s ease-in-out\n}\n.schema-create-block__article{width:100%;border:none;border-bottom:1px solid #008f9f;margin-bottom:40px;padding-bottom:10px\n}\n.schema-create-block__title{width:100%;border:none;border-bottom:1px solid #008f9f;margin-bottom:40px;padding-bottom:10px\n}\n.schema-create-block__label,.schema-create-block__select{display:inline-block;margin-right:40px\n}\n.schema-create-block__select{background-color:#fff;border:1px solid #008f9f\n}\n.schema-create-block__submit{display:block;width:40%;border-radius:15px;border:none;padding:10px 0;margin:40px auto;background-color:#00a287;color:#fff;box-shadow:none\n}\n.feature-add{display:block;cursor:pointer;width:50px;height:50px;margin:20px auto;border:none;background-color:#fff;background-image:url(" + escape(__webpack_require__(45)) + ");background-position:50%;background-repeat:no-repeat\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/schema.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;AC0ND,QACA,aAAA,2BACA,iBACA,wBACA;CACA;AAEA,eACA,2BAAA,gCACA,mCACA,aACA,uBACA,kBACA;CACA;AAEA,qBACA,sBAAA,mBACA,UACA,aACA,sCAEA,2BAGA,kBAIA;CAHA;AAMA,wBACA,WAAA,YACA;CACA;AAEA,yDAEA,UAAA,aACA,gBACA,aACA,2BACA,mBACA,iBACA,8BAGA;CACA;AAEA,8BAEA,WAAA,YACA,gCACA,mBACA,mBACA;CACA;AAPA,4BAEA,WAAA,YACA,gCACA,mBACA,mBACA;CACA;AAEA,yDAEA,qBAAA,iBACA;CACA;AAEA,6BACA,sBAAA,wBACA;CACA;AAEA,6BACA,cAAA,UACA,mBACA,YACA,eACA,iBACA,yBACA,WACA,eACA;CACA;AAEA,aACA,cAAA,eACA,WACA,YACA,iBACA,YACA,sBACA,+CACA,wBACA,2BACA;CACA","file":"schema.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <div class=\"schema\">\n\n        <aside-search>\n\n        </aside-search>\n\n        <div class=\"schema-create\">\n\n            <div class=\"schema-create-block\">\n\n                <h2>Создание шаблона</h2>\n                <input class=\"schema-create-block__title\" type=\"text\" name=\"\" id=\"\" placeholder=\"Название шаблона\" v-model=\"title\">\n                <input class=\"schema-create-block__article\" type=\"text\" name=\"\" id=\"\" placeholder=\"Артикул товара\" v-model=\"article\">\n                <label class=\"schema-create-block__label\" for=\"source\">Выберите источник:</label>\n                <select class=\"schema-create-block__select\" name=\"source\" id=\"source\" v-model=\"source\">\n                    <option  v-for=\"item in resources\" :value=\"item\">{{item}}</option>\n                </select>\n                <input class=\"schema-create-block__submit\" type=\"submit\" value=\"Сгенерировать\" v-if=\"stage === 1\" @click.prevent=\"generateSchemaHanler\">\n                <loading v-if=\"stage === 2\"></loading>\n                <div class=\"schema-create-features\">\n                    <div class=\"schema-create-features-nnz\">\n\n\n                        <template v-if=\"nnzFeatures.length > 0\">\n\n                            <feature\n                            v-for=\"(item, index) in nnzFeatures\"\n                            :key=\"item.id\"\n                            :iseditable=\"true\"\n                            :description=\"item.description\"\n                            :featureid=\"item.id\"\n                            :edit=\"item.edit\"\n                            @delete-feature=\"deleteFeatureHandler\"\n                            >\n                        </feature>\n\n                        <button class=\"feature-add\" type=\"button\" name=\"button\" @click=\"addFeatureHandler\"></button>\n\n                        </template>\n\n                    </div>\n\n                    <div class=\"schema-create-features-site\">\n\n                        <template v-if=\"siteFeatures.length > 0\">\n\n                            <feature\n                                v-for=\"(item, index) in siteFeatures\"\n                                :key=\"item.id\"\n                                :iseditable=\"false\"\n                                :description=\"item.description\"\n                                :featureid=\"item.id\"\n                                :edit=\"item.edit\"\n                            >\n                            </feature>\n\n                        </template>\n\n\n                    </div>\n                </div>\n\n                <button type=\"button\" name=\"button\" class=\"schema-create-block__submit\" v-if=\"stage === 3\" @click=\"saveSchemaHandler\">Сохранить</button>\n\n            </div>\n\n        </div>\n\n\n\n    </div>\n\n</template>\n\n<script>\n\nimport axios from './../../node_modules/axios/dist/axios.js';\nimport {Swappable} from '@shopify/draggable';\n\n//Компоненты\nimport feature from './interface/feature-list-item.vue';\nimport search from './interface/schema-aside.vue';\nimport loading from './interface/loading-indicator.vue';\n\nexport default {\n\n    components: {\n        'feature': feature,\n        'aside-search' : search,\n        'loading': loading\n    },\n\n    data() {\n        return {\n            stage: 1,\n            title: '',\n            article: '',\n            resources: [\n                'ipc2u.ru'\n            ],\n            source: 'ipc2u.ru',\n            nnzFeatures: [],\n            siteFeatures: []\n\n        }\n    },\n\n    created() {\n        //TODO: delete\n        // let testA = [\n        //     {description: 'aaaaa', edit: false, id: '1nnz'},\n        //     {description: 'bbbb', edit: false, id: '2nnz'},\n        //     {description: 'cccc', edit: false, id: '3nnz'},\n        //     {description: 'vvvv', edit: false, id: '4nnz'},\n        //     {description: 'gggg', edit: false, id: '5nnz'},\n        //     {description: 'dddd', edit: false, id: '6nnz'},\n        //     {description: 'ssss', edit: false, id: '7nnz'},\n        // ];\n        //\n        // let testB = [\n        //     {description: 'aaaaa', edit: false, id: '1site'},\n        //     {description: 'bbbb', edit: false, id: '2site'},\n        //     {description: 'cccc', edit: false, id: '3site'},\n        //     {description: 'vvvv', edit: false, id: '4site'},\n        //     {description: 'gggg', edit: false, id: '5site'},\n        //     {description: 'dddd', edit: false, id: '6site'},\n        //     {description: 'ssss', edit: false, id: '7site'},\n        // ];\n        //\n        // this.nnzFeatures = testA;\n        // this.siteFeatures = testB;\n    },\n\n    //Swappable блоки\n    mounted() {\n        const swappableNnz = new Swappable(document.querySelectorAll('.schema-create-features-nnz'), {\n          draggable: '.feature-item',\n          delay: 500\n        });\n        const swappableSite = new Swappable(document.querySelectorAll('.schema-create-features-site'), {\n          draggable: '.feature-item',\n          delay: 500\n        });\n\n        // swappableNnz.on('swappable:start', () => console.log('swappable:start'))\n        // swappableNnz.on('swappable:swapped', () => console.log('swappable:swapped'));\n        // swappableNnz.on('swappable:stop', () => console.log('swappable:stop'));\n        //\n        // swappableSite.on('swappable:start', () => console.log('swappable:start'))\n        // swappableSite.on('swappable:swapped', () => console.log('swappable:swapped'));\n        // swappableSite.on('swappable:stop', () => console.log('swappable:stop'));\n    },\n\n    methods: {\n\n        //Получаем данные для создания шаблона\n        generateSchemaHanler() {\n            this.stage = 2\n            axios.get(`/getschema?source=${this.source}&id=${this.article}`)\n            .then( (res) => {\n                console.log(res);\n                this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {\n                    return {\n                        description: v,\n                        edit: false,\n                        id: i + 'nnz'\n                    };\n                });\n                this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {\n                    return {\n                        description: v,\n                        edit: false,\n                        id: i + 'site'\n                    };\n                });\n                this.stage = 3;\n            })\n            .catch( (err) => console.log(err));\n        },\n\n        //Добавляем свойство\n        addFeatureHandler() {\n            this.nnzFeatures.push({\n                description: 'Новое свойство',\n                edit: false,\n                id: this.nnzFeatures.length + 'nnz'\n            });\n        },\n\n        //Удаляем свойство\n        deleteFeatureHandler(id) {\n            this.nnzFeatures = this.nnzFeatures.filter( v => v.id !== id);\n        },\n\n        //Сохраняем схему\n        saveSchemaHandler() {\n            let token = localStorage.getItem('_token');\n            let nnzFeatures = document.querySelectorAll('.schema-create-features-nnz .feature-item input');\n            let siteFeatures = document.querySelectorAll('.schema-create-features-site .feature-item input');\n            let regExpArr = Array.prototype.slice.call(siteFeatures, 0, nnzFeatures.length);\n            let schema = {};\n\n            for(let i = 0; i < nnzFeatures.length; i++) {\n                schema[nnzFeatures[i].value] = regExpArr[i].value;\n            }\n\n            axios({\n                method: 'post',\n                url: '/saveschma',\n                data: schema,\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n            .then( (res) => console.log(res))\n            .catch( (err) => console.log(err));\n        }\n\n    }\n\n}\n</script>\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .schema {\n        display: flex;\n        width: calc(var(--column) * 19);\n        min-height: 100vh;\n        background-color: var(--light-grey);\n    }\n\n    .schema-create {\n        width: calc(var(--column) * 15);\n        padding-top: calc(var(--row) * 2);\n        padding-bottom: calc(var(--row) * 2);\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .schema-create-block {\n        background-color: #fff;\n        border-radius: 15px;\n        width: 90%;\n        padding: 20px;\n        -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);\n        box-shadow: 1px 1px 4px rgba(0,0,0,.1);\n        -webkit-transition: all .3s ease-in;\n        -o-transition: all .3s ease-in;\n        transition: all .3s ease-in;\n    }\n\n    .schema-create-block {\n        margin-bottom: 40px;\n    }\n\n    .schema-create-features {\n        width: 100%;\n        display: flex;\n    }\n\n    .schema-create-features-nnz,\n    .schema-create-features-site {\n        width: 50%;\n        padding: 10px;\n        list-style: none;\n        display: flex;\n        justify-content: flex-start;\n        align-items: center;\n        flex-flow: column;\n        -webkit-transition: all .2s ease-in-out;\n        -o-transition: all .2s ease-in-out;\n        transition: all .2s ease-in-out;\n    }\n\n    .schema-create-block__title,\n    .schema-create-block__article {\n        width: 100%;\n        border: none;\n        border-bottom: 1px solid var(--marine);\n        margin-bottom: 40px;\n        padding-bottom: 10px;\n    }\n\n    .schema-create-block__label,\n    .schema-create-block__select {\n        display: inline-block;\n        margin-right: 40px;\n    }\n\n    .schema-create-block__select {\n        background-color: #fff;\n        border: 1px solid var(--marine);\n    }\n\n    .schema-create-block__submit {\n        display: block;\n        width: 40%;\n        border-radius: 15px;\n        border: none;\n        padding: 10px 0px;\n        margin: 40px auto;\n        background-color: var(--green);\n        color: #fff;\n        box-shadow: none;\n    }\n\n    .feature-add {\n        display: block;\n        cursor: pointer;\n        width: 50px;\n        height: 50px;\n        margin: 20px auto;\n        border: none;\n        background-color: #fff;\n        background-image: url('./../img/plus.svg');\n        background-position: center;\n        background-repeat: no-repeat;\n    }\n\n\n\n</style>\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.schema{display:flex;width:calc(4.16667vw * 19);min-height:100vh;background-color:#f6f6f9\n}\n.schema-create{width:calc(4.16667vw * 15);padding-top:calc(8.33333vh * 2);padding-bottom:calc(8.33333vh * 2);display:flex;justify-content:center;align-items:center\n}\n.schema-create-block{background-color:#fff;border-radius:15px;width:90%;padding:20px;box-shadow:1px 1px 4px rgba(0,0,0,.1);transition:all .3s ease-in;margin-bottom:40px\n}\n.schema-create-features{width:100%;display:flex\n}\n.schema-create-features-nnz,.schema-create-features-site{width:50%;padding:10px;list-style:none;display:flex;justify-content:flex-start;align-items:center;flex-flow:column;transition:all .2s ease-in-out\n}\n.schema-create-block__article{width:100%;border:none;border-bottom:1px solid #008f9f;margin-bottom:40px;padding-bottom:10px\n}\n.schema-create-block__title{width:100%;border:none;border-bottom:1px solid #008f9f;margin-bottom:40px;padding-bottom:10px\n}\n.schema-create-block__label,.schema-create-block__select{display:inline-block;margin-right:40px\n}\n.schema-create-block__select{background-color:#fff;border:1px solid #008f9f\n}\n.schema-create-block__submit{display:block;width:40%;border-radius:15px;border:none;padding:10px 0;margin:40px auto;background-color:#00a287;color:#fff;box-shadow:none\n}\n.feature-add{display:block;cursor:pointer;width:50px;height:50px;margin:20px auto;border:none;background-color:#fff;background-image:url(" + escape(__webpack_require__(46)) + ");background-position:50%;background-repeat:no-repeat\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/src/vue-comp/schema.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;AC+OD,QACA,aAAA,2BACA,iBACA,wBACA;CACA;AAEA,eACA,2BAAA,gCACA,mCACA,aACA,uBACA,kBACA;CACA;AAEA,qBACA,sBAAA,mBACA,UACA,aACA,sCAEA,2BAGA,kBAIA;CAHA;AAMA,wBACA,WAAA,YACA;CACA;AAEA,yDAEA,UAAA,aACA,gBACA,aACA,2BACA,mBACA,iBACA,8BAGA;CACA;AAEA,8BAEA,WAAA,YACA,gCACA,mBACA,mBACA;CACA;AAPA,4BAEA,WAAA,YACA,gCACA,mBACA,mBACA;CACA;AAEA,yDAEA,qBAAA,iBACA;CACA;AAEA,6BACA,sBAAA,wBACA;CACA;AAEA,6BACA,cAAA,UACA,mBACA,YACA,eACA,iBACA,yBACA,WACA,eACA;CACA;AAEA,aACA,cAAA,eACA,WACA,YACA,iBACA,YACA,sBACA,+CACA,wBACA,2BACA;CACA","file":"schema.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <div class=\"schema\">\n\n        <aside-search>\n\n        </aside-search>\n\n        <div class=\"schema-create\">\n\n            <div class=\"schema-create-block\">\n\n                <h2>Создание шаблона</h2>\n                <input class=\"schema-create-block__title\" type=\"text\" name=\"\" id=\"\" placeholder=\"Название шаблона\" v-model=\"title\">\n                <input class=\"schema-create-block__article\" type=\"text\" name=\"\" id=\"\" placeholder=\"Артикул товара\" v-model=\"article\">\n                <label class=\"schema-create-block__label\" for=\"source\">Выберите источник:</label>\n                <select class=\"schema-create-block__select\" name=\"source\" id=\"source\" v-model=\"source\">\n                    <option  v-for=\"item in resources\" :value=\"item\">{{item}}</option>\n                </select>\n                <input class=\"schema-create-block__submit\" type=\"submit\" value=\"Сгенерировать\" v-if=\"stage === 1\" @click.prevent=\"generateSchemaHanler\">\n                <loading v-if=\"stage === 2\"></loading>\n                <div class=\"schema-create-features\">\n                    <div class=\"schema-create-features-nnz\">\n\n\n                        <template v-if=\"nnzFeatures.length > 0\">\n\n                            <feature\n                            v-for=\"(item, index) in nnzFeatures\"\n                            :key=\"item.id\"\n                            :iseditable=\"true\"\n                            :description=\"item.description\"\n                            :featureid=\"item.id\"\n                            :edit=\"item.edit\"\n                            @delete-feature=\"deleteFeatureHandler\"\n                            >\n                        </feature>\n\n                        <button class=\"feature-add\" type=\"button\" name=\"button\" @click=\"addFeatureHandler\"></button>\n\n                        </template>\n\n                    </div>\n\n                    <div class=\"schema-create-features-site\">\n\n                        <template v-if=\"siteFeatures.length > 0\">\n\n                            <feature\n                                v-for=\"(item, index) in siteFeatures\"\n                                :key=\"item.id\"\n                                :iseditable=\"false\"\n                                :description=\"item.description\"\n                                :featureid=\"item.id\"\n                                :edit=\"item.edit\"\n                            >\n                            </feature>\n\n                        </template>\n\n\n                    </div>\n                </div>\n\n                <button type=\"button\" name=\"button\" class=\"schema-create-block__submit\" v-if=\"stage === 3\" @click=\"saveSchemaHandler\">Сохранить</button>\n\n            </div>\n\n        </div>\n\n        <flash-message :message=\"flashMsg\">\n\n        </flash-message>\n\n    </div>\n\n</template>\n\n<script>\n\nimport axios from './../../node_modules/axios/dist/axios.js';\nimport {Swappable} from '@shopify/draggable';\nimport validation from './../js/validation.js';\n\n//Компоненты\nimport feature from './interface/feature-list-item.vue';\nimport search from './interface/schema-aside.vue';\nimport loading from './interface/loading-indicator.vue';\nimport flashMessage from './interface/flash-message.vue';\n\nexport default {\n\n    components: {\n        'feature': feature,\n        'aside-search' : search,\n        'loading': loading,\n        'flash-message': flashMessage\n    },\n\n    data() {\n        return {\n            stage: 1,\n            title: '',\n            article: '',\n            resources: [\n                'ipc2u.ru'\n            ],\n            source: 'ipc2u.ru',\n            nnzFeatures: [],\n            siteFeatures: [],\n            flashMsg: ''\n\n        }\n    },\n\n    created() {\n        //TODO: delete\n        // let testA = [\n        //     {description: 'aaaaa', edit: false, id: '1nnz'},\n        //     {description: 'bbbb', edit: false, id: '2nnz'},\n        //     {description: 'cccc', edit: false, id: '3nnz'},\n        //     {description: 'vvvv', edit: false, id: '4nnz'},\n        //     {description: 'gggg', edit: false, id: '5nnz'},\n        //     {description: 'dddd', edit: false, id: '6nnz'},\n        //     {description: 'ssss', edit: false, id: '7nnz'},\n        // ];\n        //\n        // let testB = [\n        //     {description: 'aaaaa', edit: false, id: '1site'},\n        //     {description: 'bbbb', edit: false, id: '2site'},\n        //     {description: 'cccc', edit: false, id: '3site'},\n        //     {description: 'vvvv', edit: false, id: '4site'},\n        //     {description: 'gggg', edit: false, id: '5site'},\n        //     {description: 'dddd', edit: false, id: '6site'},\n        //     {description: 'ssss', edit: false, id: '7site'},\n        // ];\n        //\n        // this.nnzFeatures = testA;\n        // this.siteFeatures = testB;\n    },\n\n    //Swappable блоки\n    mounted() {\n        const swappableNnz = new Swappable(document.querySelectorAll('.schema-create-features-nnz'), {\n          draggable: '.feature-item',\n          delay: 500\n        });\n        const swappableSite = new Swappable(document.querySelectorAll('.schema-create-features-site'), {\n          draggable: '.feature-item',\n          delay: 500\n        });\n\n        // swappableNnz.on('swappable:start', () => console.log('swappable:start'))\n        // swappableNnz.on('swappable:swapped', () => console.log('swappable:swapped'));\n        // swappableNnz.on('swappable:stop', () => console.log('swappable:stop'));\n        //\n        // swappableSite.on('swappable:start', () => console.log('swappable:start'))\n        // swappableSite.on('swappable:swapped', () => console.log('swappable:swapped'));\n        // swappableSite.on('swappable:stop', () => console.log('swappable:stop'));\n    },\n\n    methods: {\n\n        //flashMessage\n        showFlashMessage(msg) {\n            let vm = this;\n            this.flashMsg = msg;\n            setTimeout( () => vm.flashMsg = '', 8000);\n        },\n\n        //Получаем данные для создания шаблона\n        generateSchemaHanler() {\n            if(validation.checkArticle(this.article)) {\n\n                this.stage = 2;\n                axios.get(`/getschema?source=${this.source}&id=${this.article}`)\n                .then( (res) => {\n                    console.log(res);\n                    this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {\n                        return {\n                            description: v,\n                            edit: false,\n                            id: i + 'nnz'\n                        };\n                    });\n                    this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {\n                        return {\n                            description: v,\n                            edit: false,\n                            id: i + 'site'\n                        };\n                    });\n                    this.stage = 3;\n                })\n                .catch( (err) => console.log(err));\n\n            }\n            else {\n                let msg = \"Поле артикул должно быть заполнено. Допускаются только цифры, длинна значения не менее 5 символов\";\n                this.showFlashMessage(msg);\n            }\n        },\n\n        //Добавляем свойство\n        addFeatureHandler() {\n            this.nnzFeatures.push({\n                description: 'Новое свойство',\n                edit: false,\n                id: this.nnzFeatures.length + 'nnz'\n            });\n        },\n\n        //Удаляем свойство\n        deleteFeatureHandler(id) {\n            this.nnzFeatures = this.nnzFeatures.filter( v => v.id !== id);\n        },\n\n        //Сохраняем схему\n        saveSchemaHandler() {\n            let token = localStorage.getItem('_token');\n            let nnzFeatures = document.querySelectorAll('.schema-create-features-nnz .feature-item input');\n            let siteFeatures = document.querySelectorAll('.schema-create-features-site .feature-item input');\n            let regExpArr = Array.prototype.slice.call(siteFeatures, 0, nnzFeatures.length);\n            let schema = {};\n\n            for(let i = 0; i < nnzFeatures.length; i++) {\n                schema[nnzFeatures[i].value] = regExpArr[i].value;\n            }\n\n            axios({\n                method: 'post',\n                url: '/saveschma',\n                data: schema,\n                headers: {\n                    'Authorization': `Bearer ${token}`\n                }\n            })\n            .then( (res) => console.log(res))\n            .catch( (err) => console.log(err));\n        }\n\n    }\n\n}\n</script>\n\n<style lang=\"css\">\n\n    @import './../css/variables.css';\n\n    .schema {\n        display: flex;\n        width: calc(var(--column) * 19);\n        min-height: 100vh;\n        background-color: var(--light-grey);\n    }\n\n    .schema-create {\n        width: calc(var(--column) * 15);\n        padding-top: calc(var(--row) * 2);\n        padding-bottom: calc(var(--row) * 2);\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .schema-create-block {\n        background-color: #fff;\n        border-radius: 15px;\n        width: 90%;\n        padding: 20px;\n        -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);\n        box-shadow: 1px 1px 4px rgba(0,0,0,.1);\n        -webkit-transition: all .3s ease-in;\n        -o-transition: all .3s ease-in;\n        transition: all .3s ease-in;\n    }\n\n    .schema-create-block {\n        margin-bottom: 40px;\n    }\n\n    .schema-create-features {\n        width: 100%;\n        display: flex;\n    }\n\n    .schema-create-features-nnz,\n    .schema-create-features-site {\n        width: 50%;\n        padding: 10px;\n        list-style: none;\n        display: flex;\n        justify-content: flex-start;\n        align-items: center;\n        flex-flow: column;\n        -webkit-transition: all .2s ease-in-out;\n        -o-transition: all .2s ease-in-out;\n        transition: all .2s ease-in-out;\n    }\n\n    .schema-create-block__title,\n    .schema-create-block__article {\n        width: 100%;\n        border: none;\n        border-bottom: 1px solid var(--marine);\n        margin-bottom: 40px;\n        padding-bottom: 10px;\n    }\n\n    .schema-create-block__label,\n    .schema-create-block__select {\n        display: inline-block;\n        margin-right: 40px;\n    }\n\n    .schema-create-block__select {\n        background-color: #fff;\n        border: 1px solid var(--marine);\n    }\n\n    .schema-create-block__submit {\n        display: block;\n        width: 40%;\n        border-radius: 15px;\n        border: none;\n        padding: 10px 0px;\n        margin: 40px auto;\n        background-color: var(--green);\n        color: #fff;\n        box-shadow: none;\n    }\n\n    .feature-add {\n        display: block;\n        cursor: pointer;\n        width: 50px;\n        height: 50px;\n        margin: 20px auto;\n        border: none;\n        background-color: #fff;\n        background-image: url('./../img/plus.svg');\n        background-position: center;\n        background-repeat: no-repeat;\n    }\n\n\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = "img/../img/plus.svg";
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -27334,7 +27394,27 @@ SortableStopEvent.type = 'sortable:stop';
 });
 
 /***/ }),
-/* 47 */
+/* 48 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  //Валидация артикула в разделе Схемы
+  checkArticle: function checkArticle(art) {
+    var pattern = /\d{5,}/i;
+    return pattern.test(art);
+  }
+};
+exports.default = _default;
+
+/***/ }),
+/* 49 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27342,12 +27422,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_feature_list_item_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_001c1d35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_feature_list_item_vue__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_001c1d35_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_feature_list_item_vue__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(2);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
-  __webpack_require__(48)
+  __webpack_require__(50)
 }
 /* script */
 
@@ -27394,13 +27474,13 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(49);
+var content = __webpack_require__(51);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -27421,7 +27501,7 @@ if(false) {
 }
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var escape = __webpack_require__(6);
@@ -27430,19 +27510,19 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.feature-item{display:flex;justify-content:space-between;margin:20px auto;width:90%;min-height:50px;box-shadow:1px 4px 6px rgba(0,143,159,.4);padding:10px\n}\n.draggable-mirror.feature-item{max-width:400px;box-shadow:0 0 6px rgba(0,143,159,.8)\n}\n.feature-item__name{width:70%;border:none;background-color:hsla(0,0%,100%,0)\n}\n.feature-item__delete{display:block;width:30px;height:30px;background:#fff;border:none;background-image:url(" + escape(__webpack_require__(50)) + ");background-position:50%;background-repeat:no-repeat\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/interface/src/vue-comp/interface/feature-list-item.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACiCD,cACA,aAAA,8BACA,iBACA,UACA,gBACA,0CAEA,YACA;CACA;AAEA,+BACA,gBAAA,qCAEA;CACA;AAEA,oBACA,UAAA,YACA,kCACA;CACA;AAEA,sBACA,cAAA,WACA,YACA,gBACA,YACA,+CACA,wBACA,2BACA;CACA","file":"feature-list-item.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <div class=\"feature-item\" :id=\"featureId\">\n        <input\n            type=\"text\"\n            name=\"feature\"\n            class=\"feature-item__name\"\n            :value=\"name\"\n            :readonly=\"!isEditable\"\n        >\n        <button v-if=\"isEditable\" class=\"feature-item__delete\" @click=\"deleteHandler\"></button>\n    </div>\n\n</template>\n\n<script>\nexport default {\n\n    props: ['iseditable', 'description', 'featureid', 'edit'],\n\n    data() {\n        return {\n            isEditable: this.iseditable,\n            name: this.description,\n            featureId: this.featureid,\n            currentEdit: this.edit\n        }\n    },\n\n    methods: {\n        //Удаляем запись\n        deleteHandler() {\n            this.$emit('delete-feature', this.featureId);\n        }\n    }\n\n\n}\n</script>\n\n<style lang=\"css\">\n\n    @import './../../css/variables.css';\n\n    .feature-item {\n        display: flex;\n        justify-content: space-between;\n        margin: 20px auto;\n        width: 90%;\n        min-height: 50px;\n        -webkit-box-shadow: 1px 4px 6px rgba(0,143,159,.4);\n        box-shadow: 1px 4px 6px rgba(0,143,159,.4);\n        padding: 10px;\n    }\n\n    .draggable-mirror.feature-item {\n        max-width: 400px;\n        -webkit-box-shadow: 0px 0px 6px rgba(0,143,159,.8);\n        box-shadow: 0px 0px 6px rgba(0,143,159,.8);\n    }\n\n    .feature-item__name {\n        width: 70%;\n        border: none;\n        background-color: rgba(255,255,255,0);\n    }\n\n    .feature-item__delete {\n        display: block;\n        width: 30px;\n        height: 30px;\n        background: #fff;\n        border: none;\n        background-image: url('./../../img/delete.svg');\n        background-position: center;\n        background-repeat: no-repeat;\n    }\n\n</style>\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.feature-item{display:flex;justify-content:space-between;margin:20px auto;width:90%;min-height:50px;box-shadow:1px 4px 6px rgba(0,143,159,.4);padding:10px\n}\n.draggable-mirror.feature-item{max-width:400px;box-shadow:0 0 6px rgba(0,143,159,.8)\n}\n.feature-item__name{width:70%;border:none;background-color:hsla(0,0%,100%,0)\n}\n.feature-item__delete{display:block;width:30px;height:30px;background:#fff;border:none;background-image:url(" + escape(__webpack_require__(52)) + ");background-position:50%;background-repeat:no-repeat\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/css/variables.css","/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/interface/src/vue-comp/interface/feature-list-item.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACiCD,cACA,aAAA,8BACA,iBACA,UACA,gBACA,0CAEA,YACA;CACA;AAEA,+BACA,gBAAA,qCAEA;CACA;AAEA,oBACA,UAAA,YACA,kCACA;CACA;AAEA,sBACA,cAAA,WACA,YACA,gBACA,YACA,+CACA,wBACA,2BACA;CACA","file":"feature-list-item.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\n\n:root {\n    --marine: #008F9F;\n    --green: #00A287;\n    --light-grey: #f6f6f9;\n    --column: calc(100vw / 24);\n    --row: calc(100vh / 12);\n    --column-mobile: calc(100vw / 12);\n    --row-mobile: calc(100vh / 24);\n    font-family: 'Open Sans', sans-serif;\n}\n","<template lang=\"html\">\n\n    <div class=\"feature-item\" :id=\"featureId\">\n        <input\n            type=\"text\"\n            name=\"feature\"\n            class=\"feature-item__name\"\n            :value=\"name\"\n            :readonly=\"!isEditable\"\n        >\n        <button v-if=\"isEditable\" class=\"feature-item__delete\" @click=\"deleteHandler\"></button>\n    </div>\n\n</template>\n\n<script>\nexport default {\n\n    props: ['iseditable', 'description', 'featureid', 'edit'],\n\n    data() {\n        return {\n            isEditable: this.iseditable,\n            name: this.description,\n            featureId: this.featureid,\n            currentEdit: this.edit\n        }\n    },\n\n    methods: {\n        //Удаляем запись\n        deleteHandler() {\n            this.$emit('delete-feature', this.featureId);\n        }\n    }\n\n\n}\n</script>\n\n<style lang=\"css\">\n\n    @import './../../css/variables.css';\n\n    .feature-item {\n        display: flex;\n        justify-content: space-between;\n        margin: 20px auto;\n        width: 90%;\n        min-height: 50px;\n        -webkit-box-shadow: 1px 4px 6px rgba(0,143,159,.4);\n        box-shadow: 1px 4px 6px rgba(0,143,159,.4);\n        padding: 10px;\n    }\n\n    .draggable-mirror.feature-item {\n        max-width: 400px;\n        -webkit-box-shadow: 0px 0px 6px rgba(0,143,159,.8);\n        box-shadow: 0px 0px 6px rgba(0,143,159,.8);\n    }\n\n    .feature-item__name {\n        width: 70%;\n        border: none;\n        background-color: rgba(255,255,255,0);\n    }\n\n    .feature-item__delete {\n        display: block;\n        width: 30px;\n        height: 30px;\n        background: #fff;\n        border: none;\n        background-image: url('./../../img/delete.svg');\n        background-position: center;\n        background-repeat: no-repeat;\n    }\n\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, exports) {
 
 module.exports = "img/../img/delete.svg";
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27482,7 +27562,7 @@ if (false) {
 }
 
 /***/ }),
-/* 52 */
+/* 54 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27490,12 +27570,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_vue__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5c1be7dc_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_aside_vue__ = __webpack_require__(55);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5c1be7dc_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_aside_vue__ = __webpack_require__(57);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(2);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
-  __webpack_require__(53)
+  __webpack_require__(55)
 }
 /* script */
 
@@ -27542,13 +27622,13 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 53 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(54);
+var content = __webpack_require__(56);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -27569,7 +27649,7 @@ if(false) {
 }
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(true);
@@ -27583,7 +27663,7 @@ exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.schema-me
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27625,7 +27705,7 @@ if (false) {
 }
 
 /***/ }),
-/* 56 */
+/* 58 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27633,12 +27713,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_loading_indicator_vue__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_loading_indicator_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_loading_indicator_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_loading_indicator_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_loading_indicator_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a1065cb0_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_loading_indicator_vue__ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a1065cb0_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_loading_indicator_vue__ = __webpack_require__(61);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(2);
 var disposed = false
 function injectStyle (context) {
   if (disposed) return
-  __webpack_require__(57)
+  __webpack_require__(59)
 }
 /* script */
 
@@ -27685,13 +27765,13 @@ if (false) {(function () {
 
 
 /***/ }),
-/* 57 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(58);
+var content = __webpack_require__(60);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -27712,7 +27792,7 @@ if(false) {
 }
 
 /***/ }),
-/* 58 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(true);
@@ -27726,7 +27806,7 @@ exports.push([module.i, "\n#loading-wrapper{position:fixed;width:100%;height:100
 
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27760,7 +27840,133 @@ if (false) {
 }
 
 /***/ }),
-/* 60 */
+/* 62 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_flash_message_vue__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_flash_message_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_flash_message_vue__);
+/* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_flash_message_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_flash_message_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_6f07f114_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_flash_message_vue__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(2);
+var disposed = false
+function injectStyle (context) {
+  if (disposed) return
+  __webpack_require__(63)
+}
+/* script */
+
+
+/* template */
+
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+
+var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
+  __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_flash_message_vue___default.a,
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_6f07f114_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_flash_message_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_6f07f114_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_flash_message_vue__["b" /* staticRenderFns */],
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "src/vue-comp/interface/flash-message.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-6f07f114", Component.options)
+  } else {
+    hotAPI.reload("data-v-6f07f114", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+/* harmony default export */ __webpack_exports__["default"] = (Component.exports);
+
+
+/***/ }),
+/* 63 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(64);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = __webpack_require__(1).default
+var update = add("448fc5b4", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-6f07f114\",\"scoped\":false,\"sourceMap\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./flash-message.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-6f07f114\",\"scoped\":false,\"sourceMap\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./flash-message.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 64 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n.flashMessage{position:fixed;top:40px;right:40px;padding:20px;width:30%;background-image:linear-gradient(180deg,#203756,#465e7e);box-shadow:1px 1px 4px rgba(0,0,0,.3);transform-origin:center;transition:all .3s ease-in-out\n}\n.flashMessage__text{text-align:center;color:#fff\n}\n.flashMessage_inactive{visibility:hidden;opacity:0;transform:scale(0);transform-origin:center\n}\n.flashMessage_active{visibility:visible;opacity:1;transform:scale(1);transform-origin:center\n}", "", {"version":3,"sources":["/Users/romanprivlov/Desktop/Projects/nnz-sale-scraping/src/vue-comp/interface/src/vue-comp/interface/flash-message.vue"],"names":[],"mappings":";AAmCA,cACA,eAAA,SACA,WACA,aACA,UACA,yDACA,sCAEA,wBACA,8BAGA;CAEA;AAEA,oBACA,kBAAA,UACA;CACA;AAEA,uBACA,kBAAA,UACA,mBACA,uBACA;CACA;AAEA,qBACA,mBAAA,UACA,mBACA,uBACA;CACA","file":"flash-message.vue","sourcesContent":["<template lang=\"html\">\n\n    <div :class=\"flashMessage\">\n        <p class=\"flashMessage__text\">{{text}}</p>\n    </div>\n\n</template>\n\n<script>\nexport default {\n\n    props: ['message'],\n\n    computed: {\n\n        text() {\n            return this.message;\n        },\n\n        //Показываем сообщение, если в компонент посупил текс\n        flashMessage() {\n            return {\n                'flashMessage' : true,\n                'flashMessage_inactive': this.text.length === 0,\n                'flashMessage_active': this.text.length > 0\n            }\n        }\n    }\n\n}\n</script>\n\n<style lang=\"css\">\n\n\n    .flashMessage {\n        position: fixed;\n        top: 40px;\n        right: 40px;\n        padding: 20px;\n        width: 30%;\n        background-image: linear-gradient(to bottom, #203756, #465E7E);\n        -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.3);\n        box-shadow: 1px 1px 4px rgba(0,0,0,.3);\n        transform-origin: center;\n        -webkit-transition: all .3s ease-in-out;\n        -o-transition: all .3s ease-in-out;\n        transition: all .3s ease-in-out;\n\n    }\n\n    .flashMessage__text {\n        text-align: center;\n        color:#fff;\n    }\n\n    .flashMessage_inactive {\n        visibility: hidden;\n        opacity: 0;\n        transform: scale(0);\n        transform-origin: center;\n    }\n\n    .flashMessage_active {\n        visibility: visible;\n        opacity: 1;\n        transform: scale(1);\n        transform-origin: center;\n    }\n\n\n\n\n\n</style>\n"],"sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 65 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { class: _vm.flashMessage }, [
+    _c("p", { staticClass: "flashMessage__text" }, [_vm._v(_vm._s(_vm.text))])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-6f07f114", { render: render, staticRenderFns: staticRenderFns })
+  }
+}
+
+/***/ }),
+/* 66 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27964,7 +28170,9 @@ var render = function() {
           ],
           1
         )
-      ])
+      ]),
+      _vm._v(" "),
+      _c("flash-message", { attrs: { message: _vm.flashMsg } })
     ],
     1
   )

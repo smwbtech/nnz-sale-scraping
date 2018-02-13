@@ -6,7 +6,7 @@
           <input class="login-form__input"type="text" name="login" id="" placeholder="Логин" v-model="login" required>
           <input class="login-form__input"type="password" name="password" id="" placeholder="Пароль" v-model="password" required>
           <input class="login-form__submit"type="submit" value="Войти">
-          <p v-show="flashMessage.length > 0">{{flashMessage}}</p>
+          <p v-show="flashMsg.length > 0">{{flashMsg}}</p>
 
       </form>
 
@@ -23,7 +23,7 @@ export default {
         return {
             login: '',
             password: '',
-            flashMessage: ''
+            flashMsg: ''
         }
     },
 
@@ -39,6 +39,7 @@ export default {
 
             axios.post('/login', userData)
             .then( (res) => {
+                console.log(res);
                 if(res.data.status) {
                     localStorage.setItem('_token', res.data.message);
                     this.$router.replace('/');

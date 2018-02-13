@@ -68,7 +68,9 @@
 
         </div>
 
+        <flash-message :message="flashMsg">
 
+        </flash-message>
 
     </div>
 
@@ -78,18 +80,21 @@
 
 import axios from './../../node_modules/axios/dist/axios.js';
 import {Swappable} from '@shopify/draggable';
+import validation from './../js/validation.js';
 
 //Компоненты
 import feature from './interface/feature-list-item.vue';
 import search from './interface/schema-aside.vue';
 import loading from './interface/loading-indicator.vue';
+import flashMessage from './interface/flash-message.vue';
 
 export default {
 
     components: {
         'feature': feature,
         'aside-search' : search,
-        'loading': loading
+        'loading': loading,
+        'flash-message': flashMessage
     },
 
     data() {
@@ -102,7 +107,8 @@ export default {
             ],
             source: 'ipc2u.ru',
             nnzFeatures: [],
-            siteFeatures: []
+            siteFeatures: [],
+            flashMsg: ''
 
         }
     },
@@ -155,29 +161,44 @@ export default {
 
     methods: {
 
+        //flashMessage
+        showFlashMessage(msg) {
+            let vm = this;
+            this.flashMsg = msg;
+            setTimeout( () => vm.flashMsg = '', 8000);
+        },
+
         //Получаем данные для создания шаблона
         generateSchemaHanler() {
-            this.stage = 2
-            axios.get(`/getschema?source=${this.source}&id=${this.article}`)
-            .then( (res) => {
-                console.log(res);
-                this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {
-                    return {
-                        description: v,
-                        edit: false,
-                        id: i + 'nnz'
-                    };
-                });
-                this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {
-                    return {
-                        description: v,
-                        edit: false,
-                        id: i + 'site'
-                    };
-                });
-                this.stage = 3;
-            })
-            .catch( (err) => console.log(err));
+            if(validation.checkArticle(this.article)) {
+
+                this.stage = 2;
+                axios.get(`/getschema?source=${this.source}&id=${this.article}`)
+                .then( (res) => {
+                    console.log(res);
+                    this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {
+                        return {
+                            description: v,
+                            edit: false,
+                            id: i + 'nnz'
+                        };
+                    });
+                    this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {
+                        return {
+                            description: v,
+                            edit: false,
+                            id: i + 'site'
+                        };
+                    });
+                    this.stage = 3;
+                })
+                .catch( (err) => console.log(err));
+
+            }
+            else {
+                let msg = "Поле артикул должно быть заполнено. Допускаются только цифры, длинна значения не менее 5 символов";
+                this.showFlashMessage(msg);
+            }
         },
 
         //Добавляем свойство
