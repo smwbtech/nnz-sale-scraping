@@ -2,9 +2,9 @@
 
     <div class="schema">
 
-        <aside class="schema-menu">
-            <input type="text" name="" id="">
-        </aside>
+        <aside-search>
+
+        </aside-search>
 
         <div class="schema-create">
 
@@ -35,6 +35,8 @@
                             >
                         </feature>
 
+                        <button class="feature-add" type="button" name="button" @click="addFeatureHandler"></button>
+
                         </template>
 
                     </div>
@@ -59,6 +61,8 @@
                     </div>
                 </div>
 
+                <button type="button" name="button" class="schema-create-block__submit" v-if="stage === 3" @click="saveSchemaHandler">Сохранить</button>
+
             </div>
 
         </div>
@@ -76,15 +80,20 @@ import {Swappable} from '@shopify/draggable';
 
 //Компоненты
 import feature from './interface/feature-list-item.vue';
+import search from './interface/schema-aside.vue';
+import loading from './interface/loading-indicator.vue';
 
 export default {
 
     components: {
-        'feature': feature
+        'feature': feature,
+        'aside-search' : search,
+        'loading': loading
     },
 
     data() {
         return {
+            stage: 1,
             title: '',
             article: '',
             resources: [
@@ -167,11 +176,23 @@ export default {
             .catch( (err) => console.log(err));
         },
 
+        //Добавляем свойство
+        addFeatureHandler() {
+            this.nnzFeatures.push({
+                description: 'Новое свойство',
+                edit: false,
+                id: this.nnzFeatures.length + 'nnz'
+            });
+        },
+
         //Удаляем свойство
         deleteFeatureHandler(id) {
-            console.log(id);
             this.nnzFeatures = this.nnzFeatures.filter( v => v.id !== id);
-            console.log(this.nnzFeatures);
+        },
+
+        //Сохраняем схему
+        saveSchemaHandler() {
+
         }
 
     }
@@ -188,11 +209,6 @@ export default {
         width: calc(var(--column) * 19);
         min-height: 100vh;
         background-color: var(--light-grey);
-    }
-
-    .schema-menu {
-        width: calc(var(--column) * 4);
-        background-color: #ccc;
     }
 
     .schema-create {
@@ -263,11 +279,25 @@ export default {
         display: block;
         width: 40%;
         border-radius: 15px;
+        border: none;
         padding: 10px 0px;
         margin: 40px auto;
         background-color: var(--green);
         color: #fff;
         box-shadow: none;
+    }
+
+    .feature-add {
+        display: block;
+        cursor: pointer;
+        width: 50px;
+        height: 50px;
+        margin: 20px auto;
+        border: none;
+        background-color: #fff;
+        background-image: url('./../img/plus.svg');
+        background-position: center;
+        background-repeat: no-repeat;
     }
 
 
