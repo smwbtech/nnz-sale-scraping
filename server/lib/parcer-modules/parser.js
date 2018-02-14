@@ -29,7 +29,9 @@ function parseFeatures(article, schema) {
 
         let pattern = schema.pattern;
         let device = null;
-        let parsedObj = {};
+        let parsedObj = null;
+
+        console.log(pattern);
 
 
         try {
@@ -61,8 +63,9 @@ function parseFeatures(article, schema) {
             await page.click(site.searchRes);
             await page.waitForSelector(site.featureBlock);
 
-            parsedObj = await page.evaluate( selector => {
+            parsedObj = await page.evaluate( (selector, patternObj) => {
                 let elements = document.querySelectorAll(selector);
+                let pattern = patternObj;
                 let res = {};
                 for(let prop in pattern) {
                     let regExp = new RegExp( pattern[prop], 'i');
@@ -73,12 +76,12 @@ function parseFeatures(article, schema) {
                     }
                 }
                 return res;
-            }, site.featureName)
+            }, site.featureName, pattern)
 
 
 
         } catch (e) {
-            console.log(err);
+            console.log(e);
         }
 
 

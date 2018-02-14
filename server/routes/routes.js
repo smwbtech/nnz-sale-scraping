@@ -31,7 +31,7 @@ router.post('/test', (req, res, err) => {
     console.log('We are here!');
     db.getSchema('5a8427a45dcf5d2d7c722168')
     .then( (result) => {
-        parcer.parseFeatures('6074856', result)
+        parcer.parseFeatures('6074856', result[0])
         .then( (data) => {
             console.log(data);
             res.send(data);
