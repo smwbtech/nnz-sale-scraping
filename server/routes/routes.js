@@ -152,5 +152,25 @@ router.post('/saveschma', (req, res, err) => {
 
 });
 
+//Получаем существующие схемы
+router.get('/getschemas', (req, res, err) => {
+    if(err) console.log(err);
+    let token = req.get('Authorization').slice(7);
+    let responseObj = {
+        success: true,
+        data: ''
+    };
+    db.getSchemas(token)
+    .then( (result) => {
+        responseObj.data = result;
+        res.send(responseObj);
+    })
+    .catch( (err) => {
+        responseObj.success = false;
+        responseObj.data = "Ошибка соединения с базой данных";
+        res.send(responseObj);
+    });
+});
+
 
 module.exports = router;

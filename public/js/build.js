@@ -3008,6 +3008,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 //
 //
+//
+//
 //Компоненты
 var _default = {
   components: {
@@ -3025,32 +3027,29 @@ var _default = {
       source: 'ipc2u.ru',
       nnzFeatures: [],
       siteFeatures: [],
-      flashMsg: ''
+      flashMsg: '',
+      userSchemas: []
     };
   },
-  created: function created() {//TODO: delete
-    // let testA = [
-    //     {description: 'aaaaa', edit: false, id: '1nnz'},
-    //     {description: 'bbbb', edit: false, id: '2nnz'},
-    //     {description: 'cccc', edit: false, id: '3nnz'},
-    //     {description: 'vvvv', edit: false, id: '4nnz'},
-    //     {description: 'gggg', edit: false, id: '5nnz'},
-    //     {description: 'dddd', edit: false, id: '6nnz'},
-    //     {description: 'ssss', edit: false, id: '7nnz'},
-    // ];
-    //
-    // let testB = [
-    //     {description: 'aaaaa', edit: false, id: '1site'},
-    //     {description: 'bbbb', edit: false, id: '2site'},
-    //     {description: 'cccc', edit: false, id: '3site'},
-    //     {description: 'vvvv', edit: false, id: '4site'},
-    //     {description: 'gggg', edit: false, id: '5site'},
-    //     {description: 'dddd', edit: false, id: '6site'},
-    //     {description: 'ssss', edit: false, id: '7site'},
-    // ];
-    //
-    // this.nnzFeatures = testA;
-    // this.siteFeatures = testB;
+  created: function created() {
+    var _this = this;
+
+    //Получаем все схемы, созданные пользователем
+    var token = localStorage.getItem('_token');
+
+    _axios.default.get('/getschemas', {
+      headers: {
+        'Authorization': "Bearer ".concat(token)
+      }
+    }).then(function (res) {
+      console.log(res);
+
+      if (res.data.success) {
+        _this.userSchemas = res.data.data;
+      }
+    }).catch(function (err) {
+      return console.log(err);
+    });
   },
   //Swappable блоки
   mounted: function mounted() {
@@ -3080,28 +3079,28 @@ var _default = {
     },
     //Получаем данные для создания шаблона
     generateSchemaHanler: function generateSchemaHanler() {
-      var _this = this;
+      var _this2 = this;
 
       if (_validation.default.checkArticle(this.article)) {
         this.stage = 2;
 
         _axios.default.get("/getschema?source=".concat(this.source, "&id=").concat(this.article)).then(function (res) {
           console.log(res);
-          _this.nnzFeatures = res.data.nnzFeatures.map(function (v, i, a) {
+          _this2.nnzFeatures = res.data.nnzFeatures.map(function (v, i, a) {
             return {
               description: v,
               edit: false,
               id: i + 'nnz'
             };
           });
-          _this.siteFeatures = res.data.siteFeatures.map(function (v, i, a) {
+          _this2.siteFeatures = res.data.siteFeatures.map(function (v, i, a) {
             return {
               description: v,
               edit: false,
               id: i + 'site'
             };
           });
-          _this.stage = 3;
+          _this2.stage = 3;
         }).catch(function (err) {
           return console.log(err);
         });
@@ -3124,9 +3123,11 @@ var _default = {
         return v.id !== id;
       });
     },
+    //Редактируем существующий шаблон
+    editSchemaHandler: function editSchemaHandler(id) {},
     //Сохраняем схему
     saveSchemaHandler: function saveSchemaHandler() {
-      var _this2 = this;
+      var _this3 = this;
 
       if (this.title.length > 0) {
         var token = localStorage.getItem('_token');
@@ -3155,16 +3156,18 @@ var _default = {
           if (res.data.success) {
             var msg = 'Схема успешно сохранена в базе данных';
 
-            _this2.showFlashMessage(msg);
+            _this3.showFlashMessage(msg);
+
+            _this3.stage = 1;
           } else {
             var _msg = res.data.data;
 
-            _this2.showFlashMessage(_msg);
+            _this3.showFlashMessage(_msg);
           }
         }).catch(function (err) {
           var msg = 'Ошибка соединения с сервером';
 
-          _this2.showFlashMessage(msg);
+          _this3.showFlashMessage(msg);
         });
       } else {
         var msg = "Поле название шаблона должно быть заполнено";
@@ -3231,6 +3234,14 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _schemaAsideItem = _interopRequireDefault(__webpack_require__(71));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//
+//
+//
 //
 //
 //
@@ -3253,10 +3264,23 @@ exports.default = void 0;
 //
 //
 var _default = {
+  props: ['schemas'],
+  components: {
+    'aside-item': _schemaAsideItem.default
+  },
   data: function data() {
-    return {
-      schemas: []
-    };
+    return {};
+  },
+  computed: {
+    schemasArr: function schemasArr() {
+      return this.schemas;
+    }
+  },
+  methods: {
+    //Редактирование шаблона
+    editHandler: function editHandler(id) {
+      this.$emit('edit', id);
+    }
   }
 };
 exports.default = _default;
@@ -18146,7 +18170,7 @@ exports = module.exports = __webpack_require__(0)(true);
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.schema{display:flex;width:calc(4.16667vw * 19);min-height:100vh;background-color:#f6f6f9\n}\n.schema-create{width:calc(4.16667vw * 15);padding-top:calc(8.33333vh * 2);padding-bottom:calc(8.33333vh * 2);display:flex;justify-content:center;align-items:center\n}\n.schema-create-block{background-color:#fff;border-radius:15px;width:90%;padding:20px;box-shadow:1px 1px 4px rgba(0,0,0,.1);transition:all .3s ease-in;margin-bottom:40px\n}\n.schema-create-features{width:100%;display:flex\n}\n.schema-create-features-nnz,.schema-create-features-site{width:50%;padding:10px;list-style:none;display:flex;justify-content:flex-start;align-items:center;flex-flow:column;transition:all .2s ease-in-out\n}\n.schema-create-block__article{width:100%;border:none;border-bottom:1px solid #008f9f;margin-bottom:40px;padding-bottom:10px\n}\n.schema-create-block__title{width:100%;border:none;border-bottom:1px solid #008f9f;margin-bottom:40px;padding-bottom:10px\n}\n.schema-create-block__label,.schema-create-block__select{display:inline-block;margin-right:40px\n}\n.schema-create-block__select{background-color:#fff;border:1px solid #008f9f\n}\n.schema-create-block__submit{display:block;width:40%;border-radius:15px;border:none;padding:10px 0;margin:40px auto;background-color:#00a287;color:#fff;box-shadow:none\n}\n.feature-add{display:block;cursor:pointer;width:50px;height:50px;margin:20px auto;border:none;background-color:#fff;background-image:url(" + escape(__webpack_require__(46)) + ");background-position:50%;background-repeat:no-repeat\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/src/vue-comp/schema.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACqQD,QACA,aAAA,2BACA,iBACA,wBACA;CACA;AAEA,eACA,2BAAA,gCACA,mCACA,aACA,uBACA,kBACA;CACA;AAEA,qBACA,sBAAA,mBACA,UACA,aACA,sCAEA,2BAGA,kBAIA;CAHA;AAMA,wBACA,WAAA,YACA;CACA;AAEA,yDAEA,UAAA,aACA,gBACA,aACA,2BACA,mBACA,iBACA,8BAGA;CACA;AAEA,8BAEA,WAAA,YACA,gCACA,mBACA,mBACA;CACA;AAPA,4BAEA,WAAA,YACA,gCACA,mBACA,mBACA;CACA;AAEA,yDAEA,qBAAA,iBACA;CACA;AAEA,6BACA,sBAAA,wBACA;CACA;AAEA,6BACA,cAAA,UACA,mBACA,YACA,eACA,iBACA,yBACA,WACA,eACA;CACA;AAEA,aACA,cAAA,eACA,WACA,YACA,iBACA,YACA,sBACA,+CACA,wBACA,2BACA;CACA","file":"schema.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --light-grey: #f6f6f9;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n    <div class=\"schema\">\r\n\r\n        <aside-search>\r\n\r\n        </aside-search>\r\n\r\n        <div class=\"schema-create\">\r\n\r\n            <div class=\"schema-create-block\">\r\n\r\n                <h2>Создание шаблона</h2>\r\n                <input class=\"schema-create-block__title\" type=\"text\" name=\"\" id=\"\" placeholder=\"Название шаблона\" v-model=\"title\">\r\n                <input class=\"schema-create-block__article\" type=\"text\" name=\"\" id=\"\" placeholder=\"Артикул товара\" v-model=\"article\">\r\n                <label class=\"schema-create-block__label\" for=\"source\">Выберите источник:</label>\r\n                <select class=\"schema-create-block__select\" name=\"source\" id=\"source\" v-model=\"source\">\r\n                    <option  v-for=\"item in resources\" :value=\"item\">{{item}}</option>\r\n                </select>\r\n                <input class=\"schema-create-block__submit\" type=\"submit\" value=\"Сгенерировать\" v-if=\"stage === 1\" @click.prevent=\"generateSchemaHanler\">\r\n                <loading v-if=\"stage === 2\"></loading>\r\n                <div class=\"schema-create-features\">\r\n                    <div class=\"schema-create-features-nnz\">\r\n\r\n\r\n                        <template v-if=\"nnzFeatures.length > 0\">\r\n\r\n                            <feature\r\n                            v-for=\"(item, index) in nnzFeatures\"\r\n                            :key=\"item.id\"\r\n                            :iseditable=\"true\"\r\n                            :description=\"item.description\"\r\n                            :featureid=\"item.id\"\r\n                            :edit=\"item.edit\"\r\n                            @delete-feature=\"deleteFeatureHandler\"\r\n                            >\r\n                        </feature>\r\n\r\n                        <button class=\"feature-add\" type=\"button\" name=\"button\" @click=\"addFeatureHandler\"></button>\r\n\r\n                        </template>\r\n\r\n                    </div>\r\n\r\n                    <div class=\"schema-create-features-site\">\r\n\r\n                        <template v-if=\"siteFeatures.length > 0\">\r\n\r\n                            <feature\r\n                                v-for=\"(item, index) in siteFeatures\"\r\n                                :key=\"item.id\"\r\n                                :iseditable=\"false\"\r\n                                :description=\"item.description\"\r\n                                :featureid=\"item.id\"\r\n                                :edit=\"item.edit\"\r\n                            >\r\n                            </feature>\r\n\r\n                        </template>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n\r\n                <button type=\"button\" name=\"button\" class=\"schema-create-block__submit\" v-if=\"stage === 3\" @click=\"saveSchemaHandler\">Сохранить</button>\r\n\r\n            </div>\r\n\r\n        </div>\r\n\r\n        <flash-message :message=\"flashMsg\">\r\n\r\n        </flash-message>\r\n\r\n    </div>\r\n\r\n</template>\r\n\r\n<script>\r\n\r\nimport axios from './../../node_modules/axios/dist/axios.js';\r\nimport {Swappable} from '@shopify/draggable';\r\nimport validation from './../js/validation.js';\r\n\r\n//Компоненты\r\nimport feature from './interface/feature-list-item.vue';\r\nimport search from './interface/schema-aside.vue';\r\nimport loading from './interface/loading-indicator.vue';\r\nimport flashMessage from './interface/flash-message.vue';\r\n\r\nexport default {\r\n\r\n    components: {\r\n        'feature': feature,\r\n        'aside-search' : search,\r\n        'loading': loading,\r\n        'flash-message': flashMessage\r\n    },\r\n\r\n    data() {\r\n        return {\r\n            stage: 1,\r\n            title: '',\r\n            article: '',\r\n            resources: [\r\n                'ipc2u.ru'\r\n            ],\r\n            source: 'ipc2u.ru',\r\n            nnzFeatures: [],\r\n            siteFeatures: [],\r\n            flashMsg: ''\r\n\r\n        }\r\n    },\r\n\r\n    created() {\r\n        //TODO: delete\r\n        // let testA = [\r\n        //     {description: 'aaaaa', edit: false, id: '1nnz'},\r\n        //     {description: 'bbbb', edit: false, id: '2nnz'},\r\n        //     {description: 'cccc', edit: false, id: '3nnz'},\r\n        //     {description: 'vvvv', edit: false, id: '4nnz'},\r\n        //     {description: 'gggg', edit: false, id: '5nnz'},\r\n        //     {description: 'dddd', edit: false, id: '6nnz'},\r\n        //     {description: 'ssss', edit: false, id: '7nnz'},\r\n        // ];\r\n        //\r\n        // let testB = [\r\n        //     {description: 'aaaaa', edit: false, id: '1site'},\r\n        //     {description: 'bbbb', edit: false, id: '2site'},\r\n        //     {description: 'cccc', edit: false, id: '3site'},\r\n        //     {description: 'vvvv', edit: false, id: '4site'},\r\n        //     {description: 'gggg', edit: false, id: '5site'},\r\n        //     {description: 'dddd', edit: false, id: '6site'},\r\n        //     {description: 'ssss', edit: false, id: '7site'},\r\n        // ];\r\n        //\r\n        // this.nnzFeatures = testA;\r\n        // this.siteFeatures = testB;\r\n    },\r\n\r\n    //Swappable блоки\r\n    mounted() {\r\n        const swappableNnz = new Swappable(document.querySelectorAll('.schema-create-features-nnz'), {\r\n          draggable: '.feature-item',\r\n          delay: 500\r\n        });\r\n        const swappableSite = new Swappable(document.querySelectorAll('.schema-create-features-site'), {\r\n          draggable: '.feature-item',\r\n          delay: 500\r\n        });\r\n\r\n        // swappableNnz.on('swappable:start', () => console.log('swappable:start'))\r\n        // swappableNnz.on('swappable:swapped', () => console.log('swappable:swapped'));\r\n        // swappableNnz.on('swappable:stop', () => console.log('swappable:stop'));\r\n        //\r\n        // swappableSite.on('swappable:start', () => console.log('swappable:start'))\r\n        // swappableSite.on('swappable:swapped', () => console.log('swappable:swapped'));\r\n        // swappableSite.on('swappable:stop', () => console.log('swappable:stop'));\r\n    },\r\n\r\n    methods: {\r\n\r\n        //flashMessage\r\n        showFlashMessage(msg) {\r\n            let vm = this;\r\n            this.flashMsg = msg;\r\n            setTimeout( () => vm.flashMsg = '', 8000);\r\n        },\r\n\r\n        //Получаем данные для создания шаблона\r\n        generateSchemaHanler() {\r\n            if(validation.checkArticle(this.article)) {\r\n\r\n                this.stage = 2;\r\n                axios.get(`/getschema?source=${this.source}&id=${this.article}`)\r\n                .then( (res) => {\r\n                    console.log(res);\r\n                    this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {\r\n                        return {\r\n                            description: v,\r\n                            edit: false,\r\n                            id: i + 'nnz'\r\n                        };\r\n                    });\r\n                    this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {\r\n                        return {\r\n                            description: v,\r\n                            edit: false,\r\n                            id: i + 'site'\r\n                        };\r\n                    });\r\n                    this.stage = 3;\r\n                })\r\n                .catch( (err) => console.log(err));\r\n\r\n            }\r\n            else {\r\n                let msg = \"Поле артикул должно быть заполнено. Допускаются только цифры, длинна значения не менее 5 символов\";\r\n                this.showFlashMessage(msg);\r\n            }\r\n        },\r\n\r\n        //Добавляем свойство\r\n        addFeatureHandler() {\r\n            this.nnzFeatures.push({\r\n                description: 'Новое свойство',\r\n                edit: false,\r\n                id: this.nnzFeatures.length + 'nnz'\r\n            });\r\n        },\r\n\r\n        //Удаляем свойство\r\n        deleteFeatureHandler(id) {\r\n            this.nnzFeatures = this.nnzFeatures.filter( v => v.id !== id);\r\n        },\r\n\r\n        //Сохраняем схему\r\n        saveSchemaHandler() {\r\n            if(this.title.length > 0) {\r\n                let token = localStorage.getItem('_token');\r\n                let nnzFeatures = document.querySelectorAll('.schema-create-features-nnz .feature-item input');\r\n                let siteFeatures = document.querySelectorAll('.schema-create-features-site .feature-item input');\r\n                let regExpArr = Array.prototype.slice.call(siteFeatures, 0, nnzFeatures.length);\r\n                let schema = {\r\n                    name: this.title,\r\n                    pattern: {}\r\n                };\r\n\r\n                for(let i = 0; i < nnzFeatures.length; i++) {\r\n                    schema.pattern[nnzFeatures[i].value] = regExpArr[i].value;\r\n                }\r\n\r\n                axios({\r\n                    method: 'post',\r\n                    url: '/saveschma',\r\n                    data: schema,\r\n                    headers: {\r\n                        'Authorization': `Bearer ${token}`\r\n                    }\r\n                })\r\n                .then( (res) => {\r\n                    console.log(res);\r\n                    if(res.data.success) {\r\n                        let msg = 'Схема успешно сохранена в базе данных';\r\n                        this.showFlashMessage(msg);\r\n                    }\r\n                    else {\r\n                        let msg = res.data.data;\r\n                        this.showFlashMessage(msg);\r\n                    }\r\n                })\r\n                .catch( (err) => {\r\n                    let msg = 'Ошибка соединения с сервером';\r\n                    this.showFlashMessage(msg);\r\n                });\r\n            }\r\n            else {\r\n                let msg = \"Поле название шаблона должно быть заполнено\";\r\n                this.showFlashMessage(msg);\r\n            }\r\n        }\r\n\r\n    }\r\n\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n    @import './../css/variables.css';\r\n\r\n    .schema {\r\n        display: flex;\r\n        width: calc(var(--column) * 19);\r\n        min-height: 100vh;\r\n        background-color: var(--light-grey);\r\n    }\r\n\r\n    .schema-create {\r\n        width: calc(var(--column) * 15);\r\n        padding-top: calc(var(--row) * 2);\r\n        padding-bottom: calc(var(--row) * 2);\r\n        display: flex;\r\n        justify-content: center;\r\n        align-items: center;\r\n    }\r\n\r\n    .schema-create-block {\r\n        background-color: #fff;\r\n        border-radius: 15px;\r\n        width: 90%;\r\n        padding: 20px;\r\n        -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);\r\n        box-shadow: 1px 1px 4px rgba(0,0,0,.1);\r\n        -webkit-transition: all .3s ease-in;\r\n        -o-transition: all .3s ease-in;\r\n        transition: all .3s ease-in;\r\n    }\r\n\r\n    .schema-create-block {\r\n        margin-bottom: 40px;\r\n    }\r\n\r\n    .schema-create-features {\r\n        width: 100%;\r\n        display: flex;\r\n    }\r\n\r\n    .schema-create-features-nnz,\r\n    .schema-create-features-site {\r\n        width: 50%;\r\n        padding: 10px;\r\n        list-style: none;\r\n        display: flex;\r\n        justify-content: flex-start;\r\n        align-items: center;\r\n        flex-flow: column;\r\n        -webkit-transition: all .2s ease-in-out;\r\n        -o-transition: all .2s ease-in-out;\r\n        transition: all .2s ease-in-out;\r\n    }\r\n\r\n    .schema-create-block__title,\r\n    .schema-create-block__article {\r\n        width: 100%;\r\n        border: none;\r\n        border-bottom: 1px solid var(--marine);\r\n        margin-bottom: 40px;\r\n        padding-bottom: 10px;\r\n    }\r\n\r\n    .schema-create-block__label,\r\n    .schema-create-block__select {\r\n        display: inline-block;\r\n        margin-right: 40px;\r\n    }\r\n\r\n    .schema-create-block__select {\r\n        background-color: #fff;\r\n        border: 1px solid var(--marine);\r\n    }\r\n\r\n    .schema-create-block__submit {\r\n        display: block;\r\n        width: 40%;\r\n        border-radius: 15px;\r\n        border: none;\r\n        padding: 10px 0px;\r\n        margin: 40px auto;\r\n        background-color: var(--green);\r\n        color: #fff;\r\n        box-shadow: none;\r\n    }\r\n\r\n    .feature-add {\r\n        display: block;\r\n        cursor: pointer;\r\n        width: 50px;\r\n        height: 50px;\r\n        margin: 20px auto;\r\n        border: none;\r\n        background-color: #fff;\r\n        background-image: url('./../img/plus.svg');\r\n        background-position: center;\r\n        background-repeat: no-repeat;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.schema{display:flex;width:calc(4.16667vw * 19);min-height:100vh;background-color:#f6f6f9\n}\n.schema-create{width:calc(4.16667vw * 15);padding-top:calc(8.33333vh * 2);padding-bottom:calc(8.33333vh * 2);display:flex;justify-content:center;align-items:center\n}\n.schema-create-block{background-color:#fff;border-radius:15px;width:90%;padding:20px;box-shadow:1px 1px 4px rgba(0,0,0,.1);transition:all .3s ease-in;margin-bottom:40px\n}\n.schema-create-features{width:100%;display:flex\n}\n.schema-create-features-nnz,.schema-create-features-site{width:50%;padding:10px;list-style:none;display:flex;justify-content:flex-start;align-items:center;flex-flow:column;transition:all .2s ease-in-out\n}\n.schema-create-block__article{width:100%;border:none;border-bottom:1px solid #008f9f;margin-bottom:40px;padding-bottom:10px\n}\n.schema-create-block__title{width:100%;border:none;border-bottom:1px solid #008f9f;margin-bottom:40px;padding-bottom:10px\n}\n.schema-create-block__label,.schema-create-block__select{display:inline-block;margin-right:40px\n}\n.schema-create-block__select{background-color:#fff;border:1px solid #008f9f\n}\n.schema-create-block__submit{display:block;width:40%;border-radius:15px;border:none;padding:10px 0;margin:40px auto;background-color:#00a287;color:#fff;box-shadow:none\n}\n.feature-add{display:block;cursor:pointer;width:50px;height:50px;margin:20px auto;border:none;background-color:#fff;background-image:url(" + escape(__webpack_require__(46)) + ");background-position:50%;background-repeat:no-repeat\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/src/vue-comp/schema.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACwQD,QACA,aAAA,2BACA,iBACA,wBACA;CACA;AAEA,eACA,2BAAA,gCACA,mCACA,aACA,uBACA,kBACA;CACA;AAEA,qBACA,sBAAA,mBACA,UACA,aACA,sCAEA,2BAGA,kBAIA;CAHA;AAMA,wBACA,WAAA,YACA;CACA;AAEA,yDAEA,UAAA,aACA,gBACA,aACA,2BACA,mBACA,iBACA,8BAGA;CACA;AAEA,8BAEA,WAAA,YACA,gCACA,mBACA,mBACA;CACA;AAPA,4BAEA,WAAA,YACA,gCACA,mBACA,mBACA;CACA;AAEA,yDAEA,qBAAA,iBACA;CACA;AAEA,6BACA,sBAAA,wBACA;CACA;AAEA,6BACA,cAAA,UACA,mBACA,YACA,eACA,iBACA,yBACA,WACA,eACA;CACA;AAEA,aACA,cAAA,eACA,WACA,YACA,iBACA,YACA,sBACA,+CACA,wBACA,2BACA;CACA","file":"schema.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --light-grey: #f6f6f9;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n    <div class=\"schema\">\r\n\r\n        <aside-search\r\n            :schemas=\"userSchemas\"\r\n            @edit=\"editSchemaHandler\">\r\n\r\n        </aside-search>\r\n\r\n        <div class=\"schema-create\">\r\n\r\n            <div class=\"schema-create-block\">\r\n\r\n                <h2>Создание шаблона</h2>\r\n                <input class=\"schema-create-block__title\" type=\"text\" name=\"\" id=\"\" placeholder=\"Название шаблона\" v-model=\"title\">\r\n                <input class=\"schema-create-block__article\" type=\"text\" name=\"\" id=\"\" placeholder=\"Артикул товара\" v-model=\"article\">\r\n                <label class=\"schema-create-block__label\" for=\"source\">Выберите источник:</label>\r\n                <select class=\"schema-create-block__select\" name=\"source\" id=\"source\" v-model=\"source\">\r\n                    <option  v-for=\"item in resources\" :value=\"item\">{{item}}</option>\r\n                </select>\r\n                <input class=\"schema-create-block__submit\" type=\"submit\" value=\"Сгенерировать\" v-if=\"stage === 1\" @click.prevent=\"generateSchemaHanler\">\r\n                <loading v-if=\"stage === 2\"></loading>\r\n                <div class=\"schema-create-features\">\r\n                    <div class=\"schema-create-features-nnz\">\r\n\r\n\r\n                        <template v-if=\"nnzFeatures.length > 0\">\r\n\r\n                            <feature\r\n                            v-for=\"(item, index) in nnzFeatures\"\r\n                            :key=\"item.id\"\r\n                            :iseditable=\"true\"\r\n                            :description=\"item.description\"\r\n                            :featureid=\"item.id\"\r\n                            :edit=\"item.edit\"\r\n                            @delete-feature=\"deleteFeatureHandler\"\r\n                            >\r\n                        </feature>\r\n\r\n                        <button class=\"feature-add\" type=\"button\" name=\"button\" @click=\"addFeatureHandler\"></button>\r\n\r\n                        </template>\r\n\r\n                    </div>\r\n\r\n                    <div class=\"schema-create-features-site\">\r\n\r\n                        <template v-if=\"siteFeatures.length > 0\">\r\n\r\n                            <feature\r\n                                v-for=\"(item, index) in siteFeatures\"\r\n                                :key=\"item.id\"\r\n                                :iseditable=\"false\"\r\n                                :description=\"item.description\"\r\n                                :featureid=\"item.id\"\r\n                                :edit=\"item.edit\"\r\n                            >\r\n                            </feature>\r\n\r\n                        </template>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n\r\n                <button type=\"button\" name=\"button\" class=\"schema-create-block__submit\" v-if=\"stage === 3\" @click=\"saveSchemaHandler\">Сохранить</button>\r\n\r\n            </div>\r\n\r\n        </div>\r\n\r\n        <flash-message :message=\"flashMsg\">\r\n\r\n        </flash-message>\r\n\r\n    </div>\r\n\r\n</template>\r\n\r\n<script>\r\n\r\nimport axios from './../../node_modules/axios/dist/axios.js';\r\nimport {Swappable} from '@shopify/draggable';\r\nimport validation from './../js/validation.js';\r\n\r\n//Компоненты\r\nimport feature from './interface/feature-list-item.vue';\r\nimport search from './interface/schema-aside.vue';\r\nimport loading from './interface/loading-indicator.vue';\r\nimport flashMessage from './interface/flash-message.vue';\r\n\r\nexport default {\r\n\r\n    components: {\r\n        'feature': feature,\r\n        'aside-search' : search,\r\n        'loading': loading,\r\n        'flash-message': flashMessage\r\n    },\r\n\r\n    data() {\r\n        return {\r\n            stage: 1,\r\n            title: '',\r\n            article: '',\r\n            resources: [\r\n                'ipc2u.ru'\r\n            ],\r\n            source: 'ipc2u.ru',\r\n            nnzFeatures: [],\r\n            siteFeatures: [],\r\n            flashMsg: '',\r\n            userSchemas: []\r\n\r\n        }\r\n    },\r\n\r\n    created() {\r\n\r\n        //Получаем все схемы, созданные пользователем\r\n        let token = localStorage.getItem('_token');\r\n        axios.get('/getschemas', {\r\n            headers: {\r\n                'Authorization': `Bearer ${token}`\r\n            }\r\n        })\r\n        .then( (res) => {\r\n            console.log(res);\r\n            if(res.data.success) {\r\n                this.userSchemas = res.data.data;\r\n            }\r\n        })\r\n        .catch( (err) => console.log(err));\r\n\r\n    },\r\n\r\n    //Swappable блоки\r\n    mounted() {\r\n        const swappableNnz = new Swappable(document.querySelectorAll('.schema-create-features-nnz'), {\r\n          draggable: '.feature-item',\r\n          delay: 500\r\n        });\r\n        const swappableSite = new Swappable(document.querySelectorAll('.schema-create-features-site'), {\r\n          draggable: '.feature-item',\r\n          delay: 500\r\n        });\r\n\r\n        // swappableNnz.on('swappable:start', () => console.log('swappable:start'))\r\n        // swappableNnz.on('swappable:swapped', () => console.log('swappable:swapped'));\r\n        // swappableNnz.on('swappable:stop', () => console.log('swappable:stop'));\r\n        //\r\n        // swappableSite.on('swappable:start', () => console.log('swappable:start'))\r\n        // swappableSite.on('swappable:swapped', () => console.log('swappable:swapped'));\r\n        // swappableSite.on('swappable:stop', () => console.log('swappable:stop'));\r\n    },\r\n\r\n    methods: {\r\n\r\n        //flashMessage\r\n        showFlashMessage(msg) {\r\n            let vm = this;\r\n            this.flashMsg = msg;\r\n            setTimeout( () => vm.flashMsg = '', 8000);\r\n        },\r\n\r\n        //Получаем данные для создания шаблона\r\n        generateSchemaHanler() {\r\n            if(validation.checkArticle(this.article)) {\r\n\r\n                this.stage = 2;\r\n                axios.get(`/getschema?source=${this.source}&id=${this.article}`)\r\n                .then( (res) => {\r\n                    console.log(res);\r\n                    this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {\r\n                        return {\r\n                            description: v,\r\n                            edit: false,\r\n                            id: i + 'nnz'\r\n                        };\r\n                    });\r\n                    this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {\r\n                        return {\r\n                            description: v,\r\n                            edit: false,\r\n                            id: i + 'site'\r\n                        };\r\n                    });\r\n                    this.stage = 3;\r\n                })\r\n                .catch( (err) => console.log(err));\r\n\r\n            }\r\n            else {\r\n                let msg = \"Поле артикул должно быть заполнено. Допускаются только цифры, длинна значения не менее 5 символов\";\r\n                this.showFlashMessage(msg);\r\n            }\r\n        },\r\n\r\n        //Добавляем свойство\r\n        addFeatureHandler() {\r\n            this.nnzFeatures.push({\r\n                description: 'Новое свойство',\r\n                edit: false,\r\n                id: this.nnzFeatures.length + 'nnz'\r\n            });\r\n        },\r\n\r\n        //Удаляем свойство\r\n        deleteFeatureHandler(id) {\r\n            this.nnzFeatures = this.nnzFeatures.filter( v => v.id !== id);\r\n        },\r\n\r\n\r\n        //Редактируем существующий шаблон\r\n        editSchemaHandler(id) {\r\n\r\n        },\r\n\r\n        //Сохраняем схему\r\n        saveSchemaHandler() {\r\n            if(this.title.length > 0) {\r\n                let token = localStorage.getItem('_token');\r\n                let nnzFeatures = document.querySelectorAll('.schema-create-features-nnz .feature-item input');\r\n                let siteFeatures = document.querySelectorAll('.schema-create-features-site .feature-item input');\r\n                let regExpArr = Array.prototype.slice.call(siteFeatures, 0, nnzFeatures.length);\r\n                let schema = {\r\n                    name: this.title,\r\n                    pattern: {}\r\n                };\r\n\r\n                for(let i = 0; i < nnzFeatures.length; i++) {\r\n                    schema.pattern[nnzFeatures[i].value] = regExpArr[i].value;\r\n                }\r\n\r\n                axios({\r\n                    method: 'post',\r\n                    url: '/saveschma',\r\n                    data: schema,\r\n                    headers: {\r\n                        'Authorization': `Bearer ${token}`\r\n                    }\r\n                })\r\n                .then( (res) => {\r\n                    console.log(res);\r\n                    if(res.data.success) {\r\n                        let msg = 'Схема успешно сохранена в базе данных';\r\n                        this.showFlashMessage(msg);\r\n                        this.stage = 1;\r\n                    }\r\n                    else {\r\n                        let msg = res.data.data;\r\n                        this.showFlashMessage(msg);\r\n                    }\r\n                })\r\n                .catch( (err) => {\r\n                    let msg = 'Ошибка соединения с сервером';\r\n                    this.showFlashMessage(msg);\r\n                });\r\n            }\r\n            else {\r\n                let msg = \"Поле название шаблона должно быть заполнено\";\r\n                this.showFlashMessage(msg);\r\n            }\r\n        }\r\n\r\n    }\r\n\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n    @import './../css/variables.css';\r\n\r\n    .schema {\r\n        display: flex;\r\n        width: calc(var(--column) * 19);\r\n        min-height: 100vh;\r\n        background-color: var(--light-grey);\r\n    }\r\n\r\n    .schema-create {\r\n        width: calc(var(--column) * 15);\r\n        padding-top: calc(var(--row) * 2);\r\n        padding-bottom: calc(var(--row) * 2);\r\n        display: flex;\r\n        justify-content: center;\r\n        align-items: center;\r\n    }\r\n\r\n    .schema-create-block {\r\n        background-color: #fff;\r\n        border-radius: 15px;\r\n        width: 90%;\r\n        padding: 20px;\r\n        -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.1);\r\n        box-shadow: 1px 1px 4px rgba(0,0,0,.1);\r\n        -webkit-transition: all .3s ease-in;\r\n        -o-transition: all .3s ease-in;\r\n        transition: all .3s ease-in;\r\n    }\r\n\r\n    .schema-create-block {\r\n        margin-bottom: 40px;\r\n    }\r\n\r\n    .schema-create-features {\r\n        width: 100%;\r\n        display: flex;\r\n    }\r\n\r\n    .schema-create-features-nnz,\r\n    .schema-create-features-site {\r\n        width: 50%;\r\n        padding: 10px;\r\n        list-style: none;\r\n        display: flex;\r\n        justify-content: flex-start;\r\n        align-items: center;\r\n        flex-flow: column;\r\n        -webkit-transition: all .2s ease-in-out;\r\n        -o-transition: all .2s ease-in-out;\r\n        transition: all .2s ease-in-out;\r\n    }\r\n\r\n    .schema-create-block__title,\r\n    .schema-create-block__article {\r\n        width: 100%;\r\n        border: none;\r\n        border-bottom: 1px solid var(--marine);\r\n        margin-bottom: 40px;\r\n        padding-bottom: 10px;\r\n    }\r\n\r\n    .schema-create-block__label,\r\n    .schema-create-block__select {\r\n        display: inline-block;\r\n        margin-right: 40px;\r\n    }\r\n\r\n    .schema-create-block__select {\r\n        background-color: #fff;\r\n        border: 1px solid var(--marine);\r\n    }\r\n\r\n    .schema-create-block__submit {\r\n        display: block;\r\n        width: 40%;\r\n        border-radius: 15px;\r\n        border: none;\r\n        padding: 10px 0px;\r\n        margin: 40px auto;\r\n        background-color: var(--green);\r\n        color: #fff;\r\n        box-shadow: none;\r\n    }\r\n\r\n    .feature-add {\r\n        display: block;\r\n        cursor: pointer;\r\n        width: 50px;\r\n        height: 50px;\r\n        margin: 20px auto;\r\n        border: none;\r\n        background-color: #fff;\r\n        background-image: url('./../img/plus.svg');\r\n        background-position: center;\r\n        background-repeat: no-repeat;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -27674,12 +27698,13 @@ if(false) {
 /* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
+var escape = __webpack_require__(6);
 exports = module.exports = __webpack_require__(0)(true);
 // imports
 exports.push([module.i, "@import url(http://fonts.fontstorage.com/import/opensans.css);", ""]);
 
 // module
-exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.schema-menu{width:calc(4.16667vw * 4);background-color:#ccc\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/interface/src/vue-comp/interface/schema-aside.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;AC0BD,aACA,0BAAA,qBACA;CACA","file":"schema-aside.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --light-grey: #f6f6f9;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n    <aside class=\"schema-menu\">\r\n        <input type=\"text\" name=\"\" id=\"\">\r\n\r\n        <template v-if=\"schemas.length == 0\">\r\n            <p>Вы не создали ни одной схемы</p>\r\n        </template>\r\n\r\n        <template v-else>\r\n            <div class=\"schema-search-item\" v-for=\"(item, index) in schemas\">\r\n                <p>{{item.title}}</p>\r\n                <button class=\"schema-search-item__edit\"></button>\r\n                <button class=\"schema-search-item__delete\"></button>\r\n            </div>\r\n        </template>\r\n\r\n    </aside>\r\n\r\n</template>\r\n\r\n<script>\r\nexport default {\r\n\r\n    data() {\r\n        return {\r\n            schemas: []\r\n        }\r\n    }\r\n\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n@import './../../css/variables.css';\r\n\r\n.schema-menu {\r\n    width: calc(var(--column) * 4);\r\n    background-color: #ccc;\r\n}\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n:root{font-family:Open Sans,sans-serif\n}\n.schema-menu{width:calc(4.16667vw * 4);background-color:#ccc\n}\n.schema-menu__search{display:block;position:relative;width:90%;margin:40px auto;background-color:#ccc;border:none;border-bottom:1px solid #6b6b6b;background-image:url(" + escape(__webpack_require__(70)) + ");background-position:100%;background-repeat:no-repeat;background-size:contain\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/css/variables.css","D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/interface/src/vue-comp/interface/schema-aside.vue"],"names":[],"mappings":";AAEA,MAQI,gCAAqC;CACxC;ACmDD,aACA,0BAAA,qBACA;CACA;AAEA,qBACA,cAAA,kBACA,UACA,iBACA,sBACA,YACA,gCACA,+CACA,yBACA,4BACA,uBACA;CACA","file":"schema-aside.vue","sourcesContent":["@import \"http://fonts.fontstorage.com/import/opensans.css\";\r\n\r\n:root {\r\n    --marine: #008F9F;\r\n    --green: #00A287;\r\n    --light-grey: #f6f6f9;\r\n    --column: calc(100vw / 24);\r\n    --row: calc(100vh / 12);\r\n    --column-mobile: calc(100vw / 12);\r\n    --row-mobile: calc(100vh / 24);\r\n    font-family: 'Open Sans', sans-serif;\r\n}\r\n","<template lang=\"html\">\r\n\r\n    <aside class=\"schema-menu\">\r\n        <input class=\"schema-menu__search\" type=\"text\" name=\"\" id=\"\" placeholder=\"Название шаблона\">\r\n\r\n        <template v-if=\"schemasArr.length == 0\">\r\n            <p>Вы не создали ни одной схемы</p>\r\n        </template>\r\n\r\n        <template v-else>\r\n            <aside-item\r\n                v-for=\"(item, index) in schemasArr\"\r\n                :schema=\"item\"\r\n                :key=\"item._id\"\r\n                @edit-schema=\"editHandler\"\r\n            >\r\n\r\n            </aside-item>\r\n        </template>\r\n\r\n    </aside>\r\n\r\n</template>\r\n\r\n<script>\r\n\r\nimport asideItem from './schema-aside-item.vue';\r\n\r\nexport default {\r\n\r\n    props: ['schemas'],\r\n\r\n    components: {\r\n        'aside-item': asideItem\r\n    },\r\n\r\n    data() {\r\n        return {\r\n\r\n        }\r\n    },\r\n\r\n    computed: {\r\n        schemasArr() {\r\n            return this.schemas;\r\n        }\r\n    },\r\n\r\n    methods: {\r\n        //Редактирование шаблона\r\n        editHandler(id) {\r\n            this.$emit('edit', id);\r\n        }\r\n    }\r\n\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n@import './../../css/variables.css';\r\n\r\n.schema-menu {\r\n    width: calc(var(--column) * 4);\r\n    background-color: #ccc;\r\n}\r\n\r\n.schema-menu__search {\r\n    display: block;\r\n    position: relative;\r\n    width: 90%;\r\n    margin: 40px auto;\r\n    background-color: #ccc;\r\n    border: none;\r\n    border-bottom: 1px solid #6b6b6b;\r\n    background-image: url('./../../img/magnifying-glass.svg');\r\n    background-position: right center;\r\n    background-repeat: no-repeat;\r\n    background-size: contain;\r\n}\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -27699,18 +27724,24 @@ var render = function() {
     "aside",
     { staticClass: "schema-menu" },
     [
-      _c("input", { attrs: { type: "text", name: "", id: "" } }),
+      _c("input", {
+        staticClass: "schema-menu__search",
+        attrs: {
+          type: "text",
+          name: "",
+          id: "",
+          placeholder: "Название шаблона"
+        }
+      }),
       _vm._v(" "),
-      _vm.schemas.length == 0
+      _vm.schemasArr.length == 0
         ? [_c("p", [_vm._v("Вы не создали ни одной схемы")])]
-        : _vm._l(_vm.schemas, function(item, index) {
-            return _c("div", { staticClass: "schema-search-item" }, [
-              _c("p", [_vm._v(_vm._s(item.title))]),
-              _vm._v(" "),
-              _c("button", { staticClass: "schema-search-item__edit" }),
-              _vm._v(" "),
-              _c("button", { staticClass: "schema-search-item__delete" })
-            ])
+        : _vm._l(_vm.schemasArr, function(item, index) {
+            return _c("aside-item", {
+              key: item._id,
+              attrs: { schema: item },
+              on: { "edit-schema": _vm.editHandler }
+            })
           })
     ],
     2
@@ -28002,7 +28033,10 @@ var render = function() {
     "div",
     { staticClass: "schema" },
     [
-      _c("aside-search"),
+      _c("aside-search", {
+        attrs: { schemas: _vm.userSchemas },
+        on: { edit: _vm.editSchemaHandler }
+      }),
       _vm._v(" "),
       _c("div", { staticClass: "schema-create" }, [
         _c(
@@ -28206,6 +28240,206 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-039859b1", { render: render, staticRenderFns: staticRenderFns })
+  }
+}
+
+/***/ }),
+/* 67 */
+/***/ (function(module, exports) {
+
+module.exports = "img/../img/edit.svg";
+
+/***/ }),
+/* 68 */
+/***/ (function(module, exports) {
+
+module.exports = "img/../img/copy.svg";
+
+/***/ }),
+/* 69 */
+/***/ (function(module, exports) {
+
+module.exports = "img/../img/garbage.svg";
+
+/***/ }),
+/* 70 */
+/***/ (function(module, exports) {
+
+module.exports = "img/../img/magnifying-glass.svg";
+
+/***/ }),
+/* 71 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_item_vue__ = __webpack_require__(72);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_item_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_item_vue__);
+/* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_item_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_item_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_72ce0971_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_aside_item_vue__ = __webpack_require__(75);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__ = __webpack_require__(2);
+var disposed = false
+function injectStyle (context) {
+  if (disposed) return
+  __webpack_require__(73)
+}
+/* script */
+
+
+/* template */
+
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+
+var Component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_component_normalizer__["a" /* default */])(
+  __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_schema_aside_item_vue___default.a,
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_72ce0971_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_aside_item_vue__["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_72ce0971_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_schema_aside_item_vue__["b" /* staticRenderFns */],
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "src\\vue-comp\\interface\\schema-aside-item.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-72ce0971", Component.options)
+  } else {
+    hotAPI.reload("data-v-72ce0971", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+/* harmony default export */ __webpack_exports__["default"] = (Component.exports);
+
+
+/***/ }),
+/* 72 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+var _default = {
+  props: ['schema'],
+  data: function data() {
+    return {
+      item: this.schema,
+      id: this.schema._id
+    };
+  },
+  methods: {
+    edit: function edit() {
+      this.$emit('edit-schema', this.id);
+    }
+  }
+};
+exports.default = _default;
+
+/***/ }),
+/* 73 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(74);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = __webpack_require__(1).default
+var update = add("633a7d7e", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-72ce0971\",\"scoped\":false,\"sourceMap\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./schema-aside-item.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-72ce0971\",\"scoped\":false,\"sourceMap\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./schema-aside-item.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 74 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var escape = __webpack_require__(6);
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n.schema-search-item{display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px\n}\n.schema-search-item__title{width:60%;font-size:.8rem\n}\n.schema-search-item__copy,.schema-search-item__delete,.schema-search-item__edit{display:block;width:20px;height:20px;border:none;background-color:#ccc;background-position:50%;background-repeat:no-repeat;background-size:cover;cursor:pointer\n}\n.schema-search-item__edit{background-image:url(" + escape(__webpack_require__(67)) + ")\n}\n.schema-search-item__copy{background-image:url(" + escape(__webpack_require__(68)) + ")\n}\n.schema-search-item__delete{background-image:url(" + escape(__webpack_require__(69)) + ")\n}", "", {"version":3,"sources":["D:/nodejs/learning_node/nnz-scrapping/src/vue-comp/interface/src/vue-comp/interface/schema-aside-item.vue"],"names":[],"mappings":";AAkCA,oBACA,aAAA,mBACA,8BACA,WACA,YACA;CACA;AAEA,2BACA,UAAA,eACA;CACA;AAEA,gFAGA,cAAA,WACA,YACA,YACA,sBACA,wBACA,4BACA,sBACA,cACA;CACA;AAEA,0BACA,8CAAA;CACA;AAEA,0BACA,8CAAA;CACA;AAEA,4BACA,8CAAA;CACA","file":"schema-aside-item.vue","sourcesContent":["<template lang=\"html\">\r\n\r\n    <div class=\"schema-search-item\">\r\n        <p class=\"schema-search-item__title\">{{item.name}}</p>\r\n        <button class=\"schema-search-item__edit\" @click=\"edit\"></button>\r\n        <button class=\"schema-search-item__copy\"></button>\r\n        <button class=\"schema-search-item__delete\"></button>\r\n    </div>\r\n\r\n</template>\r\n\r\n<script>\r\nexport default {\r\n\r\n    props: ['schema'],\r\n\r\n    data() {\r\n        return {\r\n            item: this.schema,\r\n            id: this.schema._id\r\n        }\r\n    },\r\n\r\n    methods: {\r\n        edit() {\r\n            this.$emit('edit-schema', this.id);\r\n        }\r\n    }\r\n\r\n}\r\n</script>\r\n\r\n<style lang=\"css\">\r\n\r\n    .schema-search-item {\r\n        display: flex;\r\n        align-items: center;\r\n        justify-content: space-between;\r\n        width: 100%;\r\n        padding: 10px;\r\n    }\r\n\r\n    .schema-search-item__title {\r\n        width: 60%;\r\n        font-size: .8rem;\r\n    }\r\n\r\n    .schema-search-item__edit,\r\n    .schema-search-item__copy,\r\n    .schema-search-item__delete {\r\n        display: block;\r\n        width: 20px;\r\n        height: 20px;\r\n        border: none;\r\n        background-color: #ccc;\r\n        background-position: center;\r\n        background-repeat: no-repeat;\r\n        background-size: cover;\r\n        cursor: pointer;\r\n    }\r\n\r\n    .schema-search-item__edit {\r\n        background-image: url('./../../img/edit.svg');\r\n    }\r\n\r\n    .schema-search-item__copy {\r\n        background-image: url('./../../img/copy.svg');\r\n    }\r\n\r\n    .schema-search-item__delete {\r\n        background-image: url('./../../img/garbage.svg');\r\n    }\r\n\r\n</style>\r\n"],"sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 75 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "schema-search-item" }, [
+    _c("p", { staticClass: "schema-search-item__title" }, [
+      _vm._v(_vm._s(_vm.item.name))
+    ]),
+    _vm._v(" "),
+    _c("button", {
+      staticClass: "schema-search-item__edit",
+      on: { click: _vm.edit }
+    }),
+    _vm._v(" "),
+    _c("button", { staticClass: "schema-search-item__copy" }),
+    _vm._v(" "),
+    _c("button", { staticClass: "schema-search-item__delete" })
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-72ce0971", { render: render, staticRenderFns: staticRenderFns })
   }
 }
 

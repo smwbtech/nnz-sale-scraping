@@ -2,7 +2,9 @@
 
     <div class="schema">
 
-        <aside-search>
+        <aside-search
+            :schemas="userSchemas"
+            @edit="editSchemaHandler">
 
         </aside-search>
 
@@ -108,35 +110,29 @@ export default {
             source: 'ipc2u.ru',
             nnzFeatures: [],
             siteFeatures: [],
-            flashMsg: ''
+            flashMsg: '',
+            userSchemas: []
 
         }
     },
 
     created() {
-        //TODO: delete
-        // let testA = [
-        //     {description: 'aaaaa', edit: false, id: '1nnz'},
-        //     {description: 'bbbb', edit: false, id: '2nnz'},
-        //     {description: 'cccc', edit: false, id: '3nnz'},
-        //     {description: 'vvvv', edit: false, id: '4nnz'},
-        //     {description: 'gggg', edit: false, id: '5nnz'},
-        //     {description: 'dddd', edit: false, id: '6nnz'},
-        //     {description: 'ssss', edit: false, id: '7nnz'},
-        // ];
-        //
-        // let testB = [
-        //     {description: 'aaaaa', edit: false, id: '1site'},
-        //     {description: 'bbbb', edit: false, id: '2site'},
-        //     {description: 'cccc', edit: false, id: '3site'},
-        //     {description: 'vvvv', edit: false, id: '4site'},
-        //     {description: 'gggg', edit: false, id: '5site'},
-        //     {description: 'dddd', edit: false, id: '6site'},
-        //     {description: 'ssss', edit: false, id: '7site'},
-        // ];
-        //
-        // this.nnzFeatures = testA;
-        // this.siteFeatures = testB;
+
+        //Получаем все схемы, созданные пользователем
+        let token = localStorage.getItem('_token');
+        axios.get('/getschemas', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then( (res) => {
+            console.log(res);
+            if(res.data.success) {
+                this.userSchemas = res.data.data;
+            }
+        })
+        .catch( (err) => console.log(err));
+
     },
 
     //Swappable блоки
@@ -215,6 +211,12 @@ export default {
             this.nnzFeatures = this.nnzFeatures.filter( v => v.id !== id);
         },
 
+
+        //Редактируем существующий шаблон
+        editSchemaHandler(id) {
+
+        },
+
         //Сохраняем схему
         saveSchemaHandler() {
             if(this.title.length > 0) {
@@ -244,6 +246,7 @@ export default {
                     if(res.data.success) {
                         let msg = 'Схема успешно сохранена в базе данных';
                         this.showFlashMessage(msg);
+                        this.stage = 1;
                     }
                     else {
                         let msg = res.data.data;

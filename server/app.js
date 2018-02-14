@@ -18,6 +18,7 @@ app.use('/getsales', router);
 app.use('/salesprogress', router);
 app.use('/getschema', router);
 app.use('/saveschma', router);
+app.use('/getschemas', router);
 
 
 //Статика

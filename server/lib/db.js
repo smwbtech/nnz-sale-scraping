@@ -133,6 +133,18 @@ let db = {
         .catch ( (err) => {
             return err;
         });
+    },
+
+    getSchemas(token) {
+        let id = jwt.decode(token).data;
+        return MongoClient.connect(url)
+        .then( (client) => {
+            const db = client.db(dbName);
+            return db.collection('schemas').find({userId: id}).toArray();
+        })
+        .catch( (err) => {
+            return err;
+        });
     }
 
 }
