@@ -165,7 +165,12 @@ router.get('/getschema', (req, res, err) => {
         console.log(result);
         res.json(result);
     })
-    .catch( (err) => console.error(err));
+    .catch( (err) => {
+        console.error(err);
+        resultObj.success = false;
+        res.data = err;
+        res.json(resultObj);
+    });
 });
 
 //Сохраняем схему созданную пользователем

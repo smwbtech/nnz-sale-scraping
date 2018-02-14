@@ -109,6 +109,7 @@ export default {
             ],
             source: 'ipc2u.ru',
             nnzFeatures: [],
+            nnzFeaturesLastId: 0,
             siteFeatures: [],
             flashMsg: '',
             userSchemas: []
@@ -171,22 +172,30 @@ export default {
                 this.stage = 2;
                 axios.get(`/getschema?source=${this.source}&id=${this.article}`)
                 .then( (res) => {
-                    console.log(res);
-                    this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {
-                        return {
-                            description: v,
-                            edit: false,
-                            id: i + 'nnz'
-                        };
-                    });
-                    this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {
-                        return {
-                            description: v,
-                            edit: false,
-                            id: i + 'site'
-                        };
-                    });
-                    this.stage = 3;
+                    if(res.data.success) {
+                        this.stage = 3;
+                        console.log(res);
+                        this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {
+                            return {
+                                description: v,
+                                edit: false,
+                                id: i + 'nnz'
+                            };
+                        });
+                        this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {
+                            return {
+                                description: v,
+                                edit: false,
+                                id: i + 'site'
+                            };
+                        });
+                        this.this.nnzFeaturesLastId = this.nnzFeatures.length;
+                    }
+                    else {
+                        this.stage = 1;
+                        this.showFlashMessage(res.data.data);
+                    }
+
                 })
                 .catch( (err) => console.log(err));
 
@@ -202,8 +211,9 @@ export default {
             this.nnzFeatures.push({
                 description: 'Новое свойство',
                 edit: false,
-                id: this.nnzFeatures.length + 'nnz'
+                id: this.nnzFeaturesLastId + 'nnz'
             });
+            this.nnzFeaturesLastId++;
         },
 
         //Удаляем свойство
