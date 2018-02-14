@@ -124,14 +124,11 @@ let db = {
     saveSchema(token, schema) {
         let id = jwt.decode(token).data;
         let dbUserId = new ObjectId(id);
-        let schemaObj = {
-            userId: id,
-            data: schema
-        };
+        schema.userId = id;
         return MongoClient.connect(url)
         .then( (client) => {
             const db = client.db(dbName);
-            return db.collection('schemas').insert(schemaObj);
+            return db.collection('schemas').insert(schema);
         })
         .catch ( (err) => {
             return err;

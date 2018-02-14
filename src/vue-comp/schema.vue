@@ -217,26 +217,48 @@ export default {
 
         //Сохраняем схему
         saveSchemaHandler() {
-            let token = localStorage.getItem('_token');
-            let nnzFeatures = document.querySelectorAll('.schema-create-features-nnz .feature-item input');
-            let siteFeatures = document.querySelectorAll('.schema-create-features-site .feature-item input');
-            let regExpArr = Array.prototype.slice.call(siteFeatures, 0, nnzFeatures.length);
-            let schema = {};
+            if(this.title.length > 0) {
+                let token = localStorage.getItem('_token');
+                let nnzFeatures = document.querySelectorAll('.schema-create-features-nnz .feature-item input');
+                let siteFeatures = document.querySelectorAll('.schema-create-features-site .feature-item input');
+                let regExpArr = Array.prototype.slice.call(siteFeatures, 0, nnzFeatures.length);
+                let schema = {
+                    name: this.title,
+                    pattern: {}
+                };
 
-            for(let i = 0; i < nnzFeatures.length; i++) {
-                schema[nnzFeatures[i].value] = regExpArr[i].value;
-            }
-
-            axios({
-                method: 'post',
-                url: '/saveschma',
-                data: schema,
-                headers: {
-                    'Authorization': `Bearer ${token}`
+                for(let i = 0; i < nnzFeatures.length; i++) {
+                    schema.pattern[nnzFeatures[i].value] = regExpArr[i].value;
                 }
-            })
-            .then( (res) => console.log(res))
-            .catch( (err) => console.log(err));
+
+                axios({
+                    method: 'post',
+                    url: '/saveschma',
+                    data: schema,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then( (res) => {
+                    console.log(res);
+                    if(res.data.success) {
+                        let msg = 'Схема успешно сохранена в базе данных';
+                        this.showFlashMessage(msg);
+                    }
+                    else {
+                        let msg = res.data.data;
+                        this.showFlashMessage(msg);
+                    }
+                })
+                .catch( (err) => {
+                    let msg = 'Ошибка соединения с сервером';
+                    this.showFlashMessage(msg);
+                });
+            }
+            else {
+                let msg = "Поле название шаблона должно быть заполнено";
+                this.showFlashMessage(msg);
+            }
         }
 
     }
