@@ -135,6 +135,7 @@ let db = {
         });
     },
 
+    //Получаем все схемы пользователя
     getSchemas(token) {
         let id = jwt.decode(token).data;
         return MongoClient.connect(url)
@@ -145,6 +146,17 @@ let db = {
         .catch( (err) => {
             return err;
         });
+    },
+
+    //Получаем одну схему по ее id
+    getSchema(id) {
+        let dbSchemaId = new ObjectId(id);
+        return MongoClient.connect(url)
+        .then( (client) => {
+            const db = client.db(dbName);
+            return db.collection('schemas').find({_id: dbSchemaId}).toArray();
+        })
+        .catch( (err) => console.log(err));
     }
 
 }

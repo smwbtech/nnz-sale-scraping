@@ -20,6 +20,9 @@ app.use('/getschema', router);
 app.use('/saveschma', router);
 app.use('/getschemas', router);
 
+//Тесты
+app.use('/test', router);
+
 
 //Статика
 app.use(express.static(path.resolve('../public')));

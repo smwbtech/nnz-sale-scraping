@@ -6,6 +6,7 @@ const ProgressBar = require('progress');
 //Модули парсера
 const sales = require('./parcer-modules/sales');
 const features = require('./parcer-modules/features');
+const parser = require('./parcer-modules/parser');
 
 module.exports = {
     //Переводим xlsx в json
@@ -34,7 +35,7 @@ module.exports = {
         //Модуль распродажи
         getLinks: sales,
 
-        //Модуль характеристик
+        //Модуль получения названий характеристик
         getFeatures(source, id) {
             switch (source) {
                 case 'ipc2u.ru':
@@ -45,6 +46,9 @@ module.exports = {
 
             }
         },
+
+        //Модуль парсинга характеристик
+        parseFeatures: parser
 
 
 }

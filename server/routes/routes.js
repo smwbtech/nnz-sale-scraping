@@ -25,6 +25,25 @@ router.get('/', (req, res, err) => {
     res.sendFile(path.resolve('../public/index.html'));
 });
 
+//Тесты
+router.post('/test', (req, res, err) => {
+    if(err) console.error(err);
+    console.log('We are here!');
+    db.getSchema('5a8427a45dcf5d2d7c722168')
+    .then( (result) => {
+        parcer.parseFeatures('6074856', result)
+        .then( (data) => {
+            console.log(data);
+            res.send(data);
+        })
+        .catch( (err) => {
+            console.error(err);
+            res.send(err);
+        })
+    })
+    .catch( (err) => console.error(err));
+});
+
 //Логин
 router.post('/login', (req, res, err) => {
     if(err) console.error(err);
