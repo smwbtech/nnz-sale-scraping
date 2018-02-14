@@ -28,20 +28,32 @@ router.get('/', (req, res, err) => {
 //Тесты
 router.post('/test', (req, res, err) => {
     if(err) console.error(err);
-    console.log('We are here!');
-    db.getSchema('5a8427a45dcf5d2d7c722168')
+    // NOTE: test for parser module
+    // console.log('We are here!');
+    // db.getSchema('5a8427a45dcf5d2d7c722168')
+    // .then( (result) => {
+    //     parcer.parseFeatures('6074856', result[0])
+    //     .then( (data) => {
+    //         console.log(data);
+    //         res.send(data);
+    //     })
+    //     .catch( (err) => {
+    //         console.error(err);
+    //         res.send(err);
+    //     })
+    // })
+    // .catch( (err) => console.error(err));
+    //NOTE: test for articles module
+    parcer.getArticles('http://new.nnz-ipc.ru/catalogue/komp_yutery_i_komplektuyuwie/vstraivaemye_komp_yutery/?filter%5Bc5de0343-a8d4-46b6-9651-07eb9bc5f57e%5D%5B%5D=Cincoze%E2%80%83&filter%5Bprice%5D%5Bfrom%5D=&filter%5Bprice%5D%5Bto%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=')
     .then( (result) => {
-        parcer.parseFeatures('6074856', result[0])
-        .then( (data) => {
-            console.log(data);
-            res.send(data);
-        })
-        .catch( (err) => {
-            console.error(err);
-            res.send(err);
-        })
+        console.log(result);
+        console.log(result);
+        res.send(result);
     })
-    .catch( (err) => console.error(err));
+    .catch( (err) => {
+        console.error(err);
+        res.send(err);
+    })
 });
 
 //Логин

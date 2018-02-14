@@ -7,6 +7,7 @@ const ProgressBar = require('progress');
 const sales = require('./parcer-modules/sales');
 const features = require('./parcer-modules/features');
 const parser = require('./parcer-modules/parser');
+const articlesCollector = require('./parcer-modules/articlescollector');
 
 module.exports = {
     //Переводим xlsx в json
@@ -48,7 +49,10 @@ module.exports = {
         },
 
         //Модуль парсинга характеристик
-        parseFeatures: parser
+        parseFeatures: parser,
+
+        //Модуль сбора артикулов из определенной категории товаров
+        getArticles: articlesCollector
 
 
 }
