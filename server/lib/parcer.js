@@ -7,7 +7,7 @@ const ProgressBar = require('progress');
 const sales = require('./parcer-modules/sales');
 const features = require('./parcer-modules/features');
 const parser2u = require('./parcer-modules/2uparser');
-const featuresIcdDe = require('./parcer-modules/icpde-features');
+const featuresIcpDe = require('./parcer-modules/icpde-features');
 const articlesCollector = require('./parcer-modules/articlescollector');
 
 module.exports = {
@@ -45,7 +45,7 @@ module.exports = {
                     return func(id);
                     break;
                 case 'icp-deutschland.de':
-                    return featuresIcdDe(id);
+                    return featuresIcpDe(id);
                     break;
                 default:
 
