@@ -42,6 +42,7 @@ function getFeatures(article) {
         catch(err) {
             resultObj.success = false;
             resultObj.data = 'Пробемы соединения с сайтом nnz-ipc.ru';
+            await browser.close();
             return resultObj;
         }
 
@@ -53,6 +54,7 @@ function getFeatures(article) {
         catch(err) {
             resultObj.success = false;
             resultObj.data = 'Товар не найден на сайте nnz-ipc.ru';
+            await browser.close();
             return resultObj;
         }
 
@@ -86,6 +88,7 @@ function getFeatures(article) {
         catch(err) {
             resultObj.success = false;
             resultObj.data = 'Проблема с доступом к характеристикам на сайте nnz-ipc.ru';
+            await browser.close();
             return resultObj;
         }
 
@@ -100,6 +103,7 @@ function getFeatures(article) {
         catch(err) {
             resultObj.success = false;
             resultObj.data = 'Проблема с доступом к выбранному сайту';
+            await browser.close();
             return resultObj;
         }
 
@@ -113,6 +117,7 @@ function getFeatures(article) {
         catch(err) {
             resultObj.success = false;
             resultObj.data = 'Товар не найден на выбранном сайте';
+            await browser.close();
             return resultObj;
         }
 
@@ -136,6 +141,7 @@ function getFeatures(article) {
         catch (e) {
             resultObj.success = false;
             resultObj.data = 'Проблема с доступок к карточке товара на выбранном сайте';
+            await browser.close();
             return resultObj;
         }
 
