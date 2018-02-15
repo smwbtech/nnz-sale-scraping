@@ -6,7 +6,8 @@ const ProgressBar = require('progress');
 //Модули парсера
 const sales = require('./parcer-modules/sales');
 const features = require('./parcer-modules/features');
-const parser = require('./parcer-modules/parser');
+const parser2u = require('./parcer-modules/2uparser');
+const featuresIcdDe = require('./parcer-modules/icpde-features');
 const articlesCollector = require('./parcer-modules/articlescollector');
 
 module.exports = {
@@ -43,13 +44,16 @@ module.exports = {
                     let func = features;
                     return func(id);
                     break;
+                case 'icp-deutschland.de':
+                    return featuresIcdDe(id);
+                    break;
                 default:
 
             }
         },
 
         //Модуль парсинга характеристик
-        parseFeatures: parser,
+        parseFeatures: parser2u,
 
         //Модуль сбора артикулов из определенной категории товаров
         getArticles: articlesCollector
