@@ -105,9 +105,10 @@ export default {
             title: '',
             article: '',
             resources: [
+                'icp-deutschland.de',
                 'ipc2u.ru'
             ],
-            source: 'ipc2u.ru',
+            source: 'icp-deutschland.de',
             nnzFeatures: [],
             nnzFeaturesLastId: 0,
             siteFeatures: [],
@@ -175,21 +176,21 @@ export default {
                     if(res.data.success) {
                         this.stage = 3;
                         console.log(res);
-                        this.nnzFeatures = res.data.nnzFeatures.map( (v,i,a) => {
+                        this.nnzFeatures = res.data.data.nnzFeatures.map( (v,i,a) => {
                             return {
                                 description: v,
                                 edit: false,
                                 id: i + 'nnz'
                             };
                         });
-                        this.siteFeatures = res.data.siteFeatures.map( (v,i,a) => {
+                        this.siteFeatures = res.data.data.siteFeatures.map( (v,i,a) => {
                             return {
                                 description: v,
                                 edit: false,
                                 id: i + 'site'
                             };
                         });
-                        this.this.nnzFeaturesLastId = this.nnzFeatures.length;
+                        this.nnzFeaturesLastId = this.nnzFeatures.length;
                     }
                     else {
                         this.stage = 1;
@@ -197,7 +198,12 @@ export default {
                     }
 
                 })
-                .catch( (err) => console.log(err));
+                .catch( (err) => {
+                    this.stage = 1;
+                    console.log(err);
+                    let msg = 'Ошибка при разборе шаблона';
+                    this.showFlashMessage(msg);
+                });
 
             }
             else {
@@ -236,6 +242,7 @@ export default {
                 let regExpArr = Array.prototype.slice.call(siteFeatures, 0, nnzFeatures.length);
                 let schema = {
                     name: this.title,
+                    source: this.source,
                     pattern: {}
                 };
 

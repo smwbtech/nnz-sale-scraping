@@ -33,7 +33,7 @@ router.post('/test', (req, res, err) => {
 
     /*test start*/
 
-    // parcer.getArticles('http://new.nnz-ipc.ru/catalogue/komp_yutery_i_komplektuyuwie/vstraivaemye_komp_yutery/?filter%5Bc5de0343-a8d4-46b6-9651-07eb9bc5f57e%5D%5B%5D=IEI%E2%80%83&filter%5Bprice%5D%5Bfrom%5D=&filter%5Bprice%5D%5Bto%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=')
+    // parcer.getArticles('http://new.nnz-ipc.ru/catalogue/ipc/processornye_platy/?filter%5Bc5de0343-a8d4-46b6-9651-07eb9bc5f57e%5D%5B%5D=IEI%E2%80%83&filter%5Bprice%5D%5Bfrom%5D=&filter%5Bprice%5D%5Bto%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=')
     // .then( (result) => {
     //     // console.log(result);
     //     arts = result;
@@ -56,7 +56,10 @@ router.post('/test', (req, res, err) => {
     /*test end*/
 
     //NOTE: icp-deutschland getFeatures test
-    parcer.getFeatures('icp-deutschland.de', 'IMB-H810-i2')
+
+    /*test start*/
+
+    parcer.getFeatures('icp-deutschland.de', '6098232')
     .then( (result) => {
         console.log(result);
         res.json(result);
@@ -65,6 +68,8 @@ router.post('/test', (req, res, err) => {
         console.log(err);
         res.send(err);
     });
+
+    /*test end*/
 
 
 

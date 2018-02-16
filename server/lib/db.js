@@ -120,7 +120,7 @@ let db = {
 
     },
 
-    //Сохранение данных в БД
+    //Сохранение схемы поиска в бд в БД
     saveSchema(token, schema) {
         let id = jwt.decode(token).data;
         let dbUserId = new ObjectId(id);
@@ -135,7 +135,7 @@ let db = {
         });
     },
 
-    //Получаем все схемы пользователя
+    //Получаем все схемы поиска пользователя
     getSchemas(token) {
         let id = jwt.decode(token).data;
         return MongoClient.connect(url)
@@ -157,6 +157,18 @@ let db = {
             return db.collection('schemas').find({_id: dbSchemaId}).toArray();
         })
         .catch( (err) => console.log(err));
+    },
+
+    //Сохраняем результаты поиска в БД
+    saveSearchResults(searchResObj) {
+        return MongoClient.connect(url)
+        .then( (client) => {
+            const db = client.db(dbName);
+            return db.collaction('searchResults').insert(searchResObj);
+        })
+        .catch( (err) => {
+            console.error(err);
+        })
     }
 
 }

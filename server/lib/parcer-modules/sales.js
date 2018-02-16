@@ -19,6 +19,7 @@ function getLinks(jsonList, progressbar) {
             try {
                 // console.log(res[i]._id.slice(4));
                 await page.goto('http://new.nnz-ipc.ru/', {timeout: 30000});
+                await page.waitForSelector('#search_form');
                 await page.type('#search_form', res[i]['Артикул'].slice(4));
                 await page.click('.search-block__form_btn');
                 await page.waitForSelector(linkSelector, {timeout: 30000});
