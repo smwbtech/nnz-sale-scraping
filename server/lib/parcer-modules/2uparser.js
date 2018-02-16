@@ -4,6 +4,7 @@ const config = require('./../config');
 
 function parseFeatures(articles, schema) {
 
+    //NOTE: убрать, сделано для тестирования
     var articles = articles.slice(0, 15);
 
     return (async () => {

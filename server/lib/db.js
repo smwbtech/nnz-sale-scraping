@@ -164,7 +164,7 @@ let db = {
         return MongoClient.connect(url)
         .then( (client) => {
             const db = client.db(dbName);
-            return db.collaction('searchResults').insert(searchResObj);
+            return db.collection('searchResults').insert(searchResObj);
         })
         .catch( (err) => {
             console.error(err);

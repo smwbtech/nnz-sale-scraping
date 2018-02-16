@@ -5,10 +5,10 @@ const config = require('./../config');
 
 /*
 *   @desc - Функция которая парсит название свойст и возвращает их в виде массива строк
-*   @product - наименование товар 1 в 1, как у производителя
-*   @return - объект resultObj:
-            @success: bool -  статус успешности выполнения
-            @data: array || string  - массив со списком характеристик ['size', 'processor', 'memory'] или строку с текстом ошибки
+*   @product: String - наименование товар 1 в 1, как у производителя
+*   @return: Object - объект resultObj:
+            @success: Bool -  статус успешности выполнения
+            @data: Array || String  - массив со списком характеристик ['size', 'processor', 'memory'] или строку с текстом ошибки
 */
 function parseFeatures(id) {
 
@@ -106,7 +106,7 @@ function parseFeatures(id) {
         //Вводим название товара в поле поиска
         try {
 
-            //Проверяем язык на странице
+            //Меняем язык на странице
             await page.click(icpde.changeLang);
             await page.waitForSelector(icpde.searchInput);
 

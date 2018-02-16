@@ -8,6 +8,7 @@ const sales = require('./parcer-modules/sales');
 const features = require('./parcer-modules/features');
 const parser2u = require('./parcer-modules/2uparser');
 const featuresIcpDe = require('./parcer-modules/icpde-features');
+const parseIcpDe = require('./parcer-modules/icpde-parser');
 const articlesCollector = require('./parcer-modules/articlescollector');
 
 module.exports = {
@@ -53,7 +54,18 @@ module.exports = {
         },
 
         //Модуль парсинга характеристик
-        parseFeatures: parser2u,
+        parseFeatures(products, schema) {
+            switch (schema.source) {
+                case 'ipc2u.ru':
+                    return parser2u(products, schema);
+                    break;
+                case 'icp-deutschland.de':
+                    return parseIcpDe(products, schema);
+                    break;
+                default:
+
+            }
+        },
 
         //Модуль сбора артикулов из определенной категории товаров
         getArticles: articlesCollector
