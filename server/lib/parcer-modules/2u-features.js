@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 const ProgressBar = require('progress');
 const config = require('./../config');
 
-function getFeatures(article) {
+function getFeatures(id) {
     return (async () => {
 
         const browser = await puppeteer.launch({headless: config.headless});
@@ -14,30 +14,15 @@ function getFeatures(article) {
         }
 
         //Основные селекторы nnz
-        const nnz = {
-            searchInput: '#search_form',
-            searchSubmit: '.search-block__form_btn',
-            searchRes: 'div.search-results_title > a',
-            featureBlock: '.sheet-block',
-            featureName: '.sheet-block td:first-child'
-        };
-
-        const site = {
-            link: 'https://ipc2u.ru/',
-            searchInput: '#title-search-input',
-            searchSubmit: '#title-search > form > button.hidefixed',
-            searchRes: '.list-search-results .title > a',
-            featureBlock: '.specification',
-            featureName: '.specification dt'
-
-        };
+        const nnz = config.nnz;
+        const site = config.ipc2u;
 
         let device = null;
 
         //Входим на сайт nnz-ipc.ru
         try {
-            await page.goto('http://new.nnz-ipc.ru/', {timeout: 30000});
-            await page.type(nnz.searchInput, article);
+            await page.goto(nnz.url, {timeout: 30000});
+            await page.waitForSelector(nnz.searchInput);
         }
         catch(err) {
             resultObj.success = false;
@@ -48,8 +33,10 @@ function getFeatures(article) {
 
         //Ищем товар на nnz
         try {
-            await page.click(nnz.searchSubmit);
-            await page.waitForSelector(nnz.searchRes, {timeout: 30000});
+            await page.focus(nnz.searchInput);
+            await page.type(nnz.searchInput, id);
+            await page.keyboard.down('Enter');
+            await page.waitForSelector(nnz.searchResultLink);
         }
         catch(err) {
             resultObj.success = false;
@@ -67,11 +54,11 @@ function getFeatures(article) {
                     name: element.innerHTML,
                     link: 'http://new.nnz-ipc.ru/' + element.getAttribute('href')
                 };
-            }, nnz.searchRes);
+            }, nnz.searchResultLink);
 
 
-            await page.click(nnz.searchRes);
-            await page.waitForSelector(nnz.featureBlock);
+            await page.click(nnz.searchResultLink);
+            await page.waitForSelector(nnz.featerNameElement);
 
             device.nnzFeatures = await page.evaluate(selector => {
                 let elements = document.querySelectorAll(selector);
@@ -80,7 +67,7 @@ function getFeatures(article) {
                     if(!elements[i].classList.contains('group-name')) res.push(elements[i].innerText);
                 }
                 return res;
-            }, nnz.featureName);
+            }, nnz.featerNameElement);
 
 
         }
@@ -97,7 +84,7 @@ function getFeatures(article) {
 
         //Идем на сайт поставщика
         try {
-            await page.goto(site.link);
+            await page.goto(site.url);
             await page.waitForSelector(site.searchInput);
         }
         catch(err) {
@@ -112,7 +99,7 @@ function getFeatures(article) {
             await page.type(site.searchInput, device.name);
             await page.focus(site.searchInput);
             await page.keyboard.down('Enter');
-            await page.waitForSelector(site.searchRes, {timeout: 15000});
+            await page.waitForSelector(site.searchResultLink, {timeout: 15000});
         }
         catch(err) {
             resultObj.success = false;
@@ -124,7 +111,7 @@ function getFeatures(article) {
         //Берем названия характеристик с сайта поставщика
         try {
 
-            await page.click(site.searchRes);
+            await page.click(site.searchResultLink);
             await page.waitForSelector(site.featureBlock);
 
             device.siteFeatures = await page.evaluate( selector => {
@@ -134,7 +121,7 @@ function getFeatures(article) {
                     res.push(elements[i].innerText);
                 }
                 return res;
-            }, site.featureName);
+            }, site.featerNameElement);
 
         }
 

@@ -5,8 +5,8 @@ const ProgressBar = require('progress');
 
 //Модули парсера
 const sales = require('./parcer-modules/sales');
-const features = require('./parcer-modules/features');
-const parser2u = require('./parcer-modules/2uparser');
+const features2u = require('./parcer-modules/2u-features');
+const parser2u = require('./parcer-modules/2u-parser');
 const featuresIcpDe = require('./parcer-modules/icpde-features');
 const parseIcpDe = require('./parcer-modules/icpde-parser');
 const articlesCollector = require('./parcer-modules/articlescollector');
@@ -42,8 +42,7 @@ module.exports = {
         getFeatures(source, id) {
             switch (source) {
                 case 'ipc2u.ru':
-                    let func = features;
-                    return func(id);
+                    return features2u(id);
                     break;
                 case 'icp-deutschland.de':
                     return featuresIcpDe(id);

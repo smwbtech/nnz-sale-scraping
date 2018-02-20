@@ -33,7 +33,7 @@ function parseFeatures(id) {
         //Пробуем войти на сайт nnz
         try {
             await page.goto(nnz.url, {timeout: 30000});
-            await page.waitForSelector(nnz.searchInput)
+            await page.waitForSelector(nnz.searchInput);
         }
         catch(err) {
             resultObj.success = false;
