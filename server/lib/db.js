@@ -169,7 +169,18 @@ let db = {
         .catch( (err) => {
             console.error(err);
         })
-    }
+    },
+
+    //Находим результат поиска по id
+    getSearchResults(id) {
+        let dbSchemaId = new ObjectId(id);
+        return MongoClient.connect(url)
+        .then( (client) => {
+            const db = client.db(dbName);
+            return db.collection('searchResults').find({_id: dbSchemaId}).toArray();
+        })
+        .catch( (err) => console.log(err));
+    },
 
 }
 

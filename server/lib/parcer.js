@@ -7,8 +7,12 @@ const ProgressBar = require('progress');
 const sales = require('./parcer-modules/sales');
 const features2u = require('./parcer-modules/2u-features');
 const parser2u = require('./parcer-modules/2u-parser');
+
+//icpde
 const featuresIcpDe = require('./parcer-modules/icpde-features');
 const parseIcpDe = require('./parcer-modules/icpde-parser');
+const extractFeaturesIcpDe = require('./parcer-modules/icpde-extractfeatures');
+
 const articlesCollector = require('./parcer-modules/articlescollector');
 
 module.exports = {
@@ -60,6 +64,17 @@ module.exports = {
                     break;
                 case 'icp-deutschland.de':
                     return parseIcpDe(products, schema);
+                    break;
+                default:
+
+            }
+        },
+
+        //Модуль извлечения характеристик
+        extractFeatures(source, searchResults) {
+            switch (source) {
+                case 'icp-deutschland.de':
+                    return extractFeaturesIcpDe(searchResults);
                     break;
                 default:
 
