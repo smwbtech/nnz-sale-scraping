@@ -20,7 +20,7 @@ const config = require('./../config');
 function getFeatures(articles, schema) {
 
     //NOTE: убрать, сделано для теста
-    var articles = articles.slice(0, 15);
+    // var articles = articles.slice(0, 15);
 
     return ( async () => {
 
@@ -94,7 +94,13 @@ function getFeatures(articles, schema) {
                         let regExp = new RegExp( pattern[prop], 'i');
                         for(let i = 0; i < elements.length; i++) {
                             if(regExp.test(elements[i].innerText)) {
-                                res[prop] = elements[i].parentNode.nextElementSibling.innerHTML;
+                                var currentElem = elements[i].parentNode.nextElementSibling;
+								var content = '';
+								while(currentElem !== null && currentElem.tagName == 'DD') {
+									content += currentElem.innerHTML + '<br>';
+									currentElem = currentElem.nextElementSibling;
+								}
+                                res[prop] = content;
                             }
                         }
                     }

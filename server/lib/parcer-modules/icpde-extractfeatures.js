@@ -5,8 +5,6 @@ function extractFeatures(searchRes) {
 
     for(let i = 0; i < searchRes.length; i++) {
 
-        console.log(searchRes);
-
         let searchResult = {};
         searchResult.data = searchRes[i].data == null  ? {} : searchRes[i].data;
         searchResult.article = searchRes[i].article;
@@ -15,12 +13,12 @@ function extractFeatures(searchRes) {
         var extractedFeatures = {
             'Артикул': searchResult.article,
             'Код вендора': searchResult.name,
-            'Производитель': searchResult.data['Производитель'] ? searchResult.data['Производитель'] : '',
-            'Форм-фактор процессорной платы': searchResult.data['Форм-фактор процессорной платы'] ? searchResult.data['Форм-фактор процессорной платы'] : '',
-            'Звуковой контроллер' : searchResult.data['Звуковой контроллер'] ? searchResult.data['Звуковой контроллер'] : '',
-            'Видеоконтроллер': searchResult.data['Видеоконтроллер'] ? searchResult.data['Видеоконтроллер'] : '',
+            'Производитель': searchResult.data['Производитель'] ? replaceBrTag(searchResult.data['Производитель']) : '',
+            'Форм-фактор процессорной платы': searchResult.data['Форм-фактор процессорной платы'] ? replaceBrTag(searchResult.data['Форм-фактор процессорной платы']) : '',
+            'Звуковой контроллер' : searchResult.data['Звуковой контроллер'] ? replaceBrTag(searchResult.data['Звуковой контроллер']) : '',
+            'Видеоконтроллер': searchResult.data['Видеоконтроллер'] ? replaceBrTag(searchResult.data['Видеоконтроллер']) : '',
             'Интерфейсы': searchResult.data['Интерфейсы'] ? replaceBrTag(searchResult.data['Интерфейсы']) : '',
-            'Поддержка IRIS': searchResult.data['IRIS'] ? searchResult.data['IRIS'] : '',
+            'Поддержка IRIS': searchResult.data['IRIS'] ? replaceBrTag(searchResult.data['IRIS']) : '',
             'Сторожевой таймер ( WDT )': '',
             'LPT': searchResult.data['Интерфейсы ввода/вывода'] ? findPort(searchResult.data['Интерфейсы ввода/вывода'], 'lpt') : '',
             'RS-232': searchResult.data['Интерфейсы ввода/вывода'] ? findPort(searchResult.data['Интерфейсы ввода/вывода'], 'RS-232') : '',
@@ -32,7 +30,7 @@ function extractFeatures(searchRes) {
             'USB 3.0': searchResult.data['Интерфейсы ввода/вывода'] ? findPort(searchResult.data['Интерфейсы ввода/вывода'], 'USB 3.0') : '',
             'Клавиатура / Мышь ( PS/2 )': searchResult.data['Интерфейсы ввода/вывода'] ? findKeyboard(searchResult.data['Интерфейсы ввода/вывода']) : '',
             'Serial ATA': searchResult.data['Интерфейсы ввода/вывода'] ? findPort(searchResult.data['Интерфейсы ввода/вывода'], 'SATA') + ' x SATA' : '',
-            'BIOS': searchResult.data['BIOS'] ? searchResult.data['BIOS'] : '',
+            'BIOS': searchResult.data['BIOS'] ? replaceBrTag(searchResult.data['BIOS']) : '',
             'Поддерживаемые операционные системы': '',
             'Количество и тип разъемов памяти': searchResult.data['Память'] ? findMemory(searchResult.data['Память'], 'port') : '',
             'Тип памяти': searchResult.data['Память'] ? findMemory(searchResult.data['Память'], 'type') : '',
@@ -43,18 +41,21 @@ function extractFeatures(searchRes) {
             'Разъем процессора': searchResult.data['Разъем процессора'] ? findLGA(searchResult.data['Разъем процессора']) : '',
             'Тип поддерживаемых процессоров': searchResult.data['Тип поддерживаемых процессоров'] ? replaceBrTag(searchResult.data['Тип поддерживаемых процессоров']) : '',
             'Частота процессора': '',
-            'Контроллер Ethernet': searchResult.data['LAN'] ? searchResult.data['LAN'] : '',
+            'Контроллер Ethernet': searchResult.data['LAN'] ? replaceBrTag(searchResult.data['LAN']) : '',
             'Количество и тип портов': '',
-            'Mini PCI': '',
-            'Mini-PCIe': '',
-            'PC/104': '',
-            'PCI': '',
-            'PCI Express': '',
+            'Mini PCI': searchResult.data['Слоты расширения'] ? findPort(searchResult.data['Слоты расширения'], 'PCI Mini') : '',
+            'Mini-PCIe': searchResult.data['Слоты расширения'] ? findPort(searchResult.data['Слоты расширения'], 'PCIe Mini') : '',
+            'PC/104': searchResult.data['Слоты расширения'] ? findPort(searchResult.data['Слоты расширения'], 'PC.104') : '',
+            'PCI': searchResult.data['Слоты расширения'] ? findPort(searchResult.data['Слоты расширения'], 'PCI') : '',
+            'PCIe x16': searchResult.data['Слоты расширения'] ? findPort(searchResult.data['Слоты расширения'], 'PCIe x16') : '',
+            'PCIe x8': searchResult.data['Слоты расширения'] ? findPort(searchResult.data['Слоты расширения'], 'PCIe x8') : '',
+            'PCIe x4': searchResult.data['Слоты расширения'] ? findPort(searchResult.data['Слоты расширения'], 'PCIe x4') : '',
+            'PCIe x1': searchResult.data['Слоты расширения'] ? findPort(searchResult.data['Слоты расширения'], 'PCIe x1') : '',
             'Рабочая влажность, %': searchResult.data['Рабочая влажность, %'] ? findHumidity(searchResult.data['Рабочая влажность, %']) : '',
             'Рабочая температура, °C': searchResult.data['Рабочая температура, °C'] ? findTempreture(searchResult.data['Рабочая температура, °C']) : '',
-            'Вес брутто, кг': '',
-            'Вес нетто, кг': '',
-            'Габаритные размеры, мм': searchResult.data['Габаритные размеры, мм'] ? searchResult.data['Габаритные размеры, мм'] : ''
+            'Вес брутто, кг': searchResult.data['Вес'] ? findWeight(searchResult.data['Вес'], 'GW') : '',
+            'Вес нетто, кг': searchResult.data['Вес'] ? findWeight(searchResult.data['Вес'], 'NW') : '',
+            'Габаритные размеры, мм': searchResult.data['Габаритные размеры, мм'] ? replaceBrTag(searchResult.data['Габаритные размеры, мм'].replace(/(mm)/ig, 'мм')) : ''
         }
 
         result.push(extractedFeatures);
@@ -112,9 +113,6 @@ function findKeyboard(str) {
 */
 function findMemory(str, param) {
 
-    console.log(str);
-    console.log(param);
-
     let pattern;
     let nums = ['one', 'two', 'three'];
     let res = null;
@@ -168,7 +166,7 @@ function findMemory(str, param) {
 
 function findPowerSupply(str) {
     let type = str.match(/(AT\/ATX|ATX)/i) !== null ? str.match(/(AT\/ATX|ATX)/)[1] : '';
-    let power = str.match(/(12V\s|5v\s|5V\/12V\s|\d{1,2}~\d{1,2})/i) !== null ? str.match(/(12V\s|5v\s|5V\/12V\s|\d{1,2}~\d{1,2})/i)[1] : '';
+    let power = str.match(/(12V\s|5v\s|5V\/12V\s|\d{1,2}~\d{1,2})/i) !== null ? str.match(/(12V\s|5v\s|5V\/12V\s|\d{1,2}~\d{1,2})/i)[1].replace(/(v)/ig, 'В') : '';
     if(type) return `${type} ${power}`;
     return '';
 }
@@ -179,8 +177,8 @@ function findPowerSupply(str) {
 *   @return: String - отформатированная строка с разъемами
 */
 function findLGA(str) {
-    let pattern = /with Processor/i;
-    pattern.test(str) ? 'Впаянный процессор' : str;
+    let pattern = /\(with Processor\)/i;
+    return pattern.test(str) ? 'Впаянный процессор' : str;
 }
 
 /*
@@ -198,9 +196,28 @@ function findHumidity(str) {
 *   @str: String - строка с информацией о температуре
 *   @return: String - отформатированная строка с информацией о температуре
 */
-
 function findTempreture(str) {
     let pattern = /(\d{1,2}.+\d{1,2}°)/i;
     let res = str.match(pattern);
     return res !== null ? `${res[1]}C` : '';
+}
+
+/*
+*   @desc - Функция которая ищет вхождения в строке с весом
+*   @str: String - строка с информацией о весе
+*   @return: String - отформатированная строка с информацией о весе
+*/
+function findWeight(str, type) {
+    let pattern = new RegExp(`${type}: (\\d+g|kg)`, 'i');
+    console.log(str);
+    console.log(pattern);
+    console.log(str.match(pattern));
+    let res = str.match(pattern);
+    if(res !== null) {
+        let resStr = '';
+        /\d+(g)/i.test(res[1]) ? resStr = res[1].replace(/(g)/i, 'г') : resStr = res[1].replace(/(kg)/i, 'кг');
+        console.log(resStr);
+        return resStr;
+    }
+    return '';
 }

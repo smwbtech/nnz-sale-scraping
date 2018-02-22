@@ -33,37 +33,37 @@ router.post('/test', (req, res, err) => {
 
     /*test start*/
     // let dbSchemaId = '5a869d57bd909d25ec96cdce';
-    // var arr = [ { article: '6098232', name: 'IMB-H810-i2' },
-    //   { article: '6074625', name: 'IMB-H610A' },
-    //   { article: '6078477', name: 'NANO-HM650' },
-    //   { article: '6044339', name: 'NANO-PV-D5251' },
-    //   { article: '6078247', name: 'NANO-QM770' },
-    //   { article: '6080109', name: 'WAFER-CV-N26002' },
-    //   { article: '1163609', name: 'WAFER-LX-800' },
-    //   { article: '6112219', name: 'HPCIE-Q170' },
-    //   { article: '6044383', name: 'WAFER-PV-D5252' },
-    //   { article: '6084153', name: 'PM-PV-N4551-R11' },
-    //   { article: '6080106', name: 'NANO-CV-D25502' },
-    //   { article: '6031977', name: 'PCIE-Q57A' },
-    //   { article: '6044099', name: 'WSB-PV-D5251' },
-    //   { article: '6044117', name: 'PICOe-PV-D5251' },
-    //   { article: '6080107', name: 'NANO-CV-N26002' },
-    //   { article: '6106057', name: 'PCISA-BT-E38451' },
-    //   { article: '6032610', name: 'SPCIE-5100DX' },
-    //   { article: '6078473', name: 'NANO-CV-D25501' },
-    //   { article: '6081849', name: 'NANO-HM651-847E' },
-    //   { article: '6074627', name: 'KINO-DH610' }];
+    // let arts = [];
+    // // var arr = [ { article: '6098232', name: 'IMB-H810-i2' },
+    // //   { article: '6074625', name: 'IMB-H610A' },
+    // //   { article: '6078477', name: 'NANO-HM650' },
+    // //   { article: '6044339', name: 'NANO-PV-D5251' },
+    // //   { article: '6078247', name: 'NANO-QM770' },
+    // //   { article: '6080109', name: 'WAFER-CV-N26002' },
+    // //   { article: '1163609', name: 'WAFER-LX-800' },
+    // //   { article: '6112219', name: 'HPCIE-Q170' },
+    // //   { article: '6044383', name: 'WAFER-PV-D5252' },
+    // //   { article: '6084153', name: 'PM-PV-N4551-R11' },
+    // //   { article: '6080106', name: 'NANO-CV-D25502' },
+    // //   { article: '6031977', name: 'PCIE-Q57A' },
+    // //   { article: '6044099', name: 'WSB-PV-D5251' },
+    // //   { article: '6044117', name: 'PICOe-PV-D5251' },
+    // //   { article: '6080107', name: 'NANO-CV-N26002' },
+    // //   { article: '6106057', name: 'PCISA-BT-E38451' },
+    // //   { article: '6032610', name: 'SPCIE-5100DX' },
+    // //   { article: '6078473', name: 'NANO-CV-D25501' },
+    // //   { article: '6081849', name: 'NANO-HM651-847E' },
+    // //   { article: '6074627', name: 'KINO-DH610' }];
     //
-    // // parcer.getArticles('http://new.nnz-ipc.ru/catalogue/ipc/processor_boards/?filter%5Bc5de0343-a8d4-46b6-9651-07eb9bc5f57e%5D%5B%5D=IEI%E2%80%83&filter%5Bprice%5D%5Bfrom%5D=&filter%5Bprice%5D%5Bto%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=')
-    // // .then( (result) => {
-    // //     arts = result;
-    // //     console.log(arts);
-    // //     return db.getSchema(dbSchemaId);
-    // // })
-    // db.getSchema(dbSchemaId)
+    // parcer.getArticles('http://new.nnz-ipc.ru/catalogue/ipc/processor_boards/?filter%5Bc5de0343-a8d4-46b6-9651-07eb9bc5f57e%5D%5B%5D=IEI%E2%80%83&filter%5Bprice%5D%5Bfrom%5D=&filter%5Bprice%5D%5Bto%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ae-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bfrom%5D=&filter%5B95cf50ad-e181-11e6-8dc0-00155d0c1500%5D%5Bto%5D=')
+    // .then( (result) => {
+    //     arts = result;
+    //     console.log(arts);
+    //     return db.getSchema(dbSchemaId);
+    // })
     // .then( (result) => {
     //     console.log(result);
-    //     return parcer.parseFeatures(arr, result[0]);
+    //     return parcer.parseFeatures(arts, result[0]);
     // })
     // .then( (data) => {
     //     console.log(data);
@@ -117,7 +117,9 @@ router.post('/test', (req, res, err) => {
     // .catch( (err) => console.error(err));
 
     //NOTE: extractFeatures icpde test
-    let dbSchemaId = '5a86d2bc8356062d7cbc1611';
+
+    /*test start*/
+    let dbSchemaId = '5a8ea19f25f3e02f3c1f42cb';
     db.getSearchResults(dbSchemaId)
     .then( (result) => {
         console.log(result[0].data);
@@ -131,6 +133,8 @@ router.post('/test', (req, res, err) => {
         res.json(result);
     })
     .catch( (err) => console.error(err));
+
+    /*test end*/
 
 });
 
