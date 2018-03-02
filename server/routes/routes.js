@@ -126,7 +126,7 @@ router.post('/test', (req, res, err) => {
         return parcer.extractFeatures('icp-deutschland.de', result[0].data);
     })
     .then( (result) => {
-        console.log(result);
+        // console.log(result);
         xlsx.write(path.resolve('./../public/upload/test_res.xlsx'), result, (err) => {
             if(err) console.log(err);
         });

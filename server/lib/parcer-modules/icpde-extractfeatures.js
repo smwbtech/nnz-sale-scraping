@@ -15,8 +15,8 @@ function extractFeatures(searchRes) {
             'Код вендора': searchResult.name,
             'Производитель': searchResult.data['Производитель'] ? replaceBrTag(searchResult.data['Производитель']) : '',
             'Форм-фактор процессорной платы': searchResult.data['Форм-фактор процессорной платы'] ? replaceBrTag(searchResult.data['Форм-фактор процессорной платы']) : '',
-            'Звуковой контроллер' : searchResult.data['Звуковой контроллер'] ? replaceBrTag(searchResult.data['Звуковой контроллер']) : '',
-            'Видеоконтроллер': searchResult.data['Видеоконтроллер'] ? replaceBrTag(searchResult.data['Видеоконтроллер']) : '',
+            'Звуковой контроллер' : searchResult.data['Звуковой контроллер'] ? findAudio(searchResult.data['Звуковой контроллер']) : '',
+            'Видеоконтроллер': searchResult.data['Видеоконтроллер'] ? findVideoController(searchResult.data['Видеоконтроллер']) : '',
             'Интерфейсы': searchResult.data['Интерфейсы'] ? replaceBrTag(searchResult.data['Интерфейсы']) : '',
             'Поддержка IRIS': searchResult.data['IRIS'] ? replaceBrTag(searchResult.data['IRIS']) : '',
             'Сторожевой таймер ( WDT )': '',
@@ -143,6 +143,47 @@ function findProcessor(str) {
 
 }
 
+/*
+*   @desc - Функция которая ищет вхождения в строке с аудиоконтроллером
+*   @str: String - строка с информацией о аудиоконтроллерах
+*   @return: String - отформатированная строка с информацией о аудиоконтроллерах
+*/
+function findAudio(str) {
+    let patternsArr = [
+        /(Realtek\s\w+)\s/i,
+        /(AC-KIT-\w+)/i
+    ];
+    return patternsArr.map( v => {
+        let res = str.match(v);
+        return res !== null ? res[1] : ''
+    })
+    .filter( v => v ? true : false)
+    .join('');
+
+}
+
+/*
+*   @desc - Функция которая ищет вхождения в строке с видеоконтроллером
+*   @str: String - строка с информацией о видеоконтроллерах
+*   @return: String - отформатированная строка с информацией о видеоконтроллерах
+*/
+
+function findVideoController(str) {
+    str = str.replace(/®/g, '');
+    let patternsArr = [
+        /(GMA\s\d+)/i,
+        /Intel\sHD\sGraphics\sGen\s[a-z0-9/\.]+\s/i
+    ];
+    let result = patternsArr.map( v => {
+        let res = str.match(v);
+        return res !== null ? res[0] : '';
+    })
+    .join('');
+    console.log(result);
+    console.log(typeof result);
+    return result;
+}
+
 
 /*
 *   @desc - Функция которая ищет вхождения в строке с портами клавиатуры
@@ -264,14 +305,10 @@ function findTempreture(str) {
 */
 function findWeight(str, type) {
     let pattern = new RegExp(`${type}: (\\d+g|kg)`, 'i');
-    console.log(str);
-    console.log(pattern);
-    console.log(str.match(pattern));
     let res = str.match(pattern);
     if(res !== null) {
         let resStr = '';
         /\d+(g)/i.test(res[1]) ? resStr = res[1].replace(/(g)/i, 'г') : resStr = res[1].replace(/(kg)/i, 'кг');
-        console.log(resStr);
         return resStr;
     }
     return '';
