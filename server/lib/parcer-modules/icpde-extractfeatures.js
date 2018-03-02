@@ -39,7 +39,7 @@ function extractFeatures(searchRes) {
             'Поддерживаемые блоки питания': searchResult.data['Поддерживаемые блоки питания'] ? findPowerSupply(searchResult.data['Поддерживаемые блоки питания']) : '',
             'Требуемые напряжения': '',
             'Разъем процессора': searchResult.data['Разъем процессора'] ? findLGA(searchResult.data['Разъем процессора']) : '',
-            'Тип поддерживаемых процессоров': searchResult.data['Тип поддерживаемых процессоров'] ? replaceBrTag(searchResult.data['Тип поддерживаемых процессоров']) : '',
+            'Тип поддерживаемых процессоров': searchResult.data['Тип поддерживаемых процессоров'] ? findProcessor(searchResult.data['Тип поддерживаемых процессоров']) : '',
             'Частота процессора': '',
             'Контроллер Ethernet': searchResult.data['LAN'] ? replaceBrTag(searchResult.data['LAN']) : '',
             'Количество и тип портов': '',
@@ -88,6 +88,61 @@ function findPort(str, port) {
     let pattern = new RegExp(`(\\d) x ${port}`, 'i');
     return str.match(pattern) !== null ? str.match(pattern)[1] : '';
 }
+
+/*
+*   @desc - Функция которая ищет вхождения в строке с процессорами
+*   @str: String - строка с информацией о процессорах
+*   @return: String - отформатированная строка с информацией о процессорах
+*/
+function findProcessor(str) {
+    let processorsArr = [
+        {
+            pattern: /i7/i,
+            title: 'Intel Core i7'
+        },
+        {
+            pattern: /i5/i,
+            title: 'Intel Core i5'
+        },
+        {
+            pattern: /i3/i,
+            title: 'Intel Core i3'
+        },
+        {
+            pattern: /Pentium/i,
+            title: 'Intel Pentium'
+        },
+        {
+            pattern: /Celeron/i,
+            title: 'Intel Celeron'
+        },
+        {
+            pattern: /Atom/i,
+            title: 'Intel Atom'
+        },
+        {
+            pattern: /Xeon/i,
+            title: 'Intel Xeon'
+        },
+        {
+            pattern: /AMD/i,
+            title: 'AMD'
+        },
+        {
+            pattern: /ARM/i,
+            title: 'ARM'
+        }
+    ];
+    return processorsArr.map( v => {
+        let res = str.match(v.pattern);
+        return res !== null ? v.title : '';
+    })
+    .filter( v => v ? true : false)
+    .join(', ');
+
+
+}
+
 
 /*
 *   @desc - Функция которая ищет вхождения в строке с портами клавиатуры
