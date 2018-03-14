@@ -2,13 +2,13 @@
 
   <section class="login">
 
-      <form action="" class="login-form" @submit.prevent="loginHandler">
-          <input class="login-form__input"type="text" name="login" id="" placeholder="Логин" v-model="login" required>
-          <input class="login-form__input"type="password" name="password" id="" placeholder="Пароль" v-model="password" required>
-          <input class="login-form__submit"type="submit" value="Войти">
-          <p v-show="flashMsg.length > 0">{{flashMsg}}</p>
+         <form action="" class="login-form" @submit.prevent="loginHandler">
+            <input class="login-form__input"type="text" name="login" id="" placeholder="Логин" v-model="login" required>
+            <input class="login-form__input"type="password" name="password" id="" placeholder="Пароль" v-model="password" required>
+            <input class="login-form__submit"type="submit" value="Войти">
+            <p v-show="flashMsg.length > 0">{{flashMsg}}</p>
 
-      </form>
+        </form>
 
   </section>
 
@@ -25,6 +25,14 @@ export default {
             password: '',
             flashMsg: ''
         }
+    },
+
+    mounted() {
+        setTimeout( () => {
+            document.querySelector('.login-form')
+            .classList.add('login-form_active');
+        }, 300);
+
     },
 
     methods: {
@@ -76,10 +84,20 @@ export default {
     .login-form {
         width: calc(var(--column) * 12);
         padding: 20px;
+        opacity: 0;
+        margin-top: 50px;
         border-radius: 15px;
         background-color: rgba(255,255,255, .65);
         -webkit-box-shadow: 5px 5px 10px rgba(0,0,0,.1);
         box-shadow: 5px 5px 10px rgba(0,0,0,.1);
+        -webkit-transition: all .3s ease-in-out;
+        -o-transition: all .3s ease-in-out;
+        transition: all .3s ease-in-out;
+    }
+
+    .login-form_active {
+        opacity: 1;
+        margin-top: 0px;
     }
 
     .login-form__input,
@@ -103,5 +121,6 @@ export default {
         background-color: var(--marine);
         color: #fff;
     }
+
 
 </style>
